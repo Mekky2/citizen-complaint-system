@@ -111,8 +111,8 @@ flowchart LR
 | Task | Description |
 |---|---|
 | 0.1 | Set up repository, branching strategy, CI/CD pipeline, and dev / staging / production environments. |
-| 0.2 | Define the data model: Ticket, User, Department, MaintenanceTeam, Attachment (citizen photos and proof of work), Notification, AuditLog, KnowledgeDocument. Include the ticket lifecycle enum (`Declined`, `Pending`, `Approved`, `Dismissed`, `In Progress`, `Verifying`, `Done`) and the agent status enum (`Processing`, `Completed`, `Failed`). |
-| 0.3 | Provision file storage for images and reports, with type and size validation hooks. |
+| 0.2 | Define the data model as versioned SQL migrations (kept in `backend/migrations/`) applied to the Supabase Postgres project: Ticket, User, Department, MaintenanceTeam, Attachment (citizen photos and proof of work), Notification, AuditLog, KnowledgeDocument. Include the ticket lifecycle enum (`Declined`, `Pending`, `Approved`, `Dismissed`, `In Progress`, `Verifying`, `Done`) and the agent status enum (`Processing`, `Completed`, `Failed`). |
+| 0.3 | Provision private Supabase Storage buckets for images and reports, with type and size validation hooks in the backend. |
 | 0.4 | Set up central logging and the audit-log infrastructure used by the Orchestrator and the dashboard. |
 | 0.5 | Create a configuration layer for tunable values (tool-call limits, retry policy, timeouts, upload limits). |
 
@@ -192,7 +192,7 @@ flowchart LR
 
 | Task | Description | Stories |
 |---|---|---|
-| 4.1 | Build the developer-managed ingestion pipeline for laws, policies and regulations (clean, chunk, index, version). There is no admin UI. | enabler for [ADM-05](./administrator_reviewer_user_stories.md#adm-05) |
+| 4.1 | Build the developer-managed ingestion pipeline for laws, policies and regulations (clean, chunk, index, version) and enable the pgvector extension in Supabase. There is no admin UI. | enabler for [ADM-05](./administrator_reviewer_user_stories.md#adm-05) |
 | 4.2 | Implement the Categorization Tool (Water, Electricity, Roads, Garbage, and so on). | enabler |
 | 4.3 | Implement the Severity Classifier Tool (Critical, Medium, Weak). | enabler for [ADM-03](./administrator_reviewer_user_stories.md#adm-03) |
 | 4.4 | Implement the RAG Retrieval Tool returning excerpts with their sources (`rag_context`). | enabler for [ADM-05](./administrator_reviewer_user_stories.md#adm-05) |
@@ -384,6 +384,7 @@ Terminal states: `Declined`, `Dismissed`, `Done`.
 | D9 | Rejected proof returns the ticket to `In Progress` | Confirmed |
 | D10 | No blocker reporting for maintenance teams | Confirmed |
 | D11 | The same role may assign and verify | Confirmed |
+| D12 | Database platform is Supabase (PostgreSQL, pgvector, Storage). The backend connects through the session pooler and the Supabase Data API is disabled. Supabase Auth and Realtime are undecided (Phases 1 and 8). | Confirmed |
 | A1 | `Dismissed` is a terminal status | Assumption |
 | A2 | `In Progress` starts when the reviewer assigns a team | Assumption |
 | A3 | Required fields: description, authority, location, name, National ID | Assumption |
@@ -392,6 +393,7 @@ Terminal states: `Declined`, `Dismissed`, `Done`.
 | A6 | "Completed" requires at least one proof item | Assumption |
 | A7 | Tracking page shows only status, category and timestamps | Assumption |
 | A8 | Reviewers can set category and severity manually on flagged tickets | Assumption derived from [ADM-04](./administrator_reviewer_user_stories.md#adm-04) |
+| A9 | Only a `dev` Supabase project exists for now. The free plan allows 2 active projects and pauses idle ones after 7 days, so staging and production projects are decided later. | Assumption |
 
 ---
 

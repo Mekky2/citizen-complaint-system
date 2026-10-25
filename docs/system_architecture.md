@@ -16,6 +16,19 @@ The system utilizes a multi-agent LLM architecture combined with a human-operato
 4. **Dashboard & Workflow System:** The human-facing interface managing the ticket state machine, including the proof-rejection loop (`Verifying → In Progress`). It also provides **in-app notifications for dashboard users only** (reviewers, maintenance teams).
 5. **Embedded Analytics AI & Analyzer:** Compiles tickets, analyzes data, and generates graphs/insights for administration.
 
+## Data Platform (Supabase)
+
+| Concern | Decision |
+|---|---|
+| Database | Supabase-hosted PostgreSQL, one project per environment (only `dev` exists for now) |
+| Vector search | pgvector extension in the same database, used by the RAG Retrieval Tool |
+| File storage | Private Supabase Storage buckets for citizen photos and maintenance proof |
+| Access path | **All access goes through the FastAPI backend.** Browsers never talk to the database. The Supabase Data API is disabled. |
+| Connection | Backend uses the Supabase **session pooler** (IPv4-friendly) with the connection string in `DATABASE_URL` |
+| Schema changes | Versioned SQL migrations in `backend/migrations/`, never edited by hand in the dashboard |
+| Secrets | Database password and any Supabase keys live only in git-ignored `.env` files and GitHub environment secrets |
+| Undecided | Supabase Auth (Phase 1) and Realtime (Phase 8) |
+
 ## Status Model
 
 There are two separate status layers. They must not be mixed.

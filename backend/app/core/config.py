@@ -9,15 +9,13 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     app_env: str = "dev"
-    database_url: str = "postgresql+psycopg://complaints:complaints@localhost:5432/complaints"
 
-    # File storage: "local" for development, "s3" once deployed
+    # Supabase Postgres via the session pooler (set in backend/.env, never committed)
+    database_url: str = ""
+
+    # File storage: "local" until task 0.3 switches it to Supabase Storage
     storage_backend: str = "local"
     storage_local_path: str = "./data/uploads"
-    s3_endpoint: str = ""
-    s3_access_key: str = ""
-    s3_secret_key: str = ""
-    s3_bucket: str = ""
 
     llm_api_key: str = ""
 
