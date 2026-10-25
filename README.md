@@ -22,7 +22,7 @@ cd backend
 python -m venv .venv
 source .venv/bin/activate        # Windows Git Bash: source .venv/Scripts/activate
 pip install -e ".[dev]"
-cp .env.example .env
+cp .env.example .env             # then set DATABASE_URL (see CONTRIBUTING.md, "Database")
 uvicorn app.main:app --reload
 ```
 Frontend:
@@ -31,5 +31,4 @@ cd frontend
 npm install
 npm run dev
 ```
-Database: install PostgreSQL 16+, then create user and database `complaints` (see CONTRIBUTING.md).
-
+Database: hosted on Supabase (PostgreSQL + pgvector + Storage). See "Database (Supabase)" in CONTRIBUTING.md.
