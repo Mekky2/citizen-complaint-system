@@ -19,3 +19,6 @@ dist/
 # Local data (uploads)
 data/
 *.log
+
+# Windows download markers (created when copying files from windows into WSL)
+*:Zone.Identifier
