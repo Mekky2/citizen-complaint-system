@@ -1,0 +1,33 @@
+Frontend
+    ↓
+FastAPI Request Model (Pydantic)
+    ↓
+Convert To
+    ↓
+LangGraph State (TypedDict)
+    ↓
+Orchestrator
+    ↓
+Complaint Agent
+    ↓
+Dashboard
+
+
+The Orchestrator only needs:
+
+Receive ticket
+Validate fields
+Send to Complaint Agent
+Receive response
+Route to dashboard
+
+
+Implemented the initial Orchestrator Agent.
+
+Uses LangGraph.
+Uses TypedDict state.
+Validation middleware checks authority, description, citizen name, and national ID.
+Routes state to Complaint Agent node.
+Receives analyzed complaint.
+Routes complaint to correct department dashboard.
+Graph flow: Validation → Complaint Agent → Route Department.
