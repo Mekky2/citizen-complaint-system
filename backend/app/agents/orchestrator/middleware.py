@@ -1,16 +1,10 @@
-from state import OrchestratorState
+from app.agents.orchestrator.state import OrchestratorState
 
-
-VALID_AUTHORITIES = [
-    "Water",
-    "Electricity",
-    "Roads",
-    "Environment"
-]
+VALID_AUTHORITIES = ["Water", "Electricity", "Roads", "Environment"]
 
 
 def validate_ticket(state: OrchestratorState):
-    
+
     payload = state["payload"]
 
     if not payload["description"]:

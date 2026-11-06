@@ -6,6 +6,7 @@ dependencies = [
   "fastapi>=0.110",
   "uvicorn[standard]>=0.29",
   "pydantic-settings>=2.2",
+  "langgraph>=1.2.11",
 ]
 
 [project.optional-dependencies]

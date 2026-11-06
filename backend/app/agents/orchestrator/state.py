@@ -1,4 +1,4 @@
-from typing import TypedDict, List, Optional
+from typing import TypedDict
 
 
 class Citizen(TypedDict):
@@ -22,8 +22,8 @@ class OrchestratorState(TypedDict):
     ticket_id: str
     status: str
     payload: Payload
-    severity: Optional[str]
-    recommendations: List[str]
+    severity: str | None
+    recommendations: list[str]
     tool_calls: int
-    error: Optional[str]
-    assigned_department: Optional[str]
+    error: str | None
+    assigned_department: str | None
