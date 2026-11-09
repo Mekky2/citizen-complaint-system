@@ -1,3 +1,4 @@
+
 import { tr, LANG } from '../i18n';
 import { TICKET_STATUS, TASK_STATUS } from './status';
 
@@ -34,43 +35,121 @@ const EXACT = {
   'lat must be between -90 and 90': tr("خط العرض غير صحيح."),
   'lng must be between -180 and 180': tr("خط الطول غير صحيح."),
 };
+
 const FIELD = {
-  name: tr("الاسم"), phone: tr("رقم الموبايل"), national_id: tr("الرقم القومي"), email: tr("البريد الإلكتروني"),
-  password: tr("كلمة المرور"), identifier: tr("رقم الموبايل أو البريد"), title: tr("العنوان"), description: tr("الوصف"),
-  lat: tr("الموقع"), lng: tr("الموقع"), address: tr("العنوان"), reason: tr("السبب"), role: tr("الدور"), notes: tr("الملاحظات"),
+  name: tr("الاسم"),
+  phone: tr("رقم الموبايل"),
+  national_id: tr("الرقم القومي"),
+  email: tr("البريد الإلكتروني"),
+  password: tr("كلمة المرور"),
+  identifier: tr("رقم الموبايل أو البريد"),
+  title: tr("العنوان"),
+  description: tr("الوصف"),
+  lat: tr("الموقع"),
+  lng: tr("الموقع"),
+  address: tr("العنوان"),
+  reason: tr("السبب"),
+  role: tr("الدور"),
+  notes: tr("الملاحظات"),
 };
-const statusLabel = (code) => (TICKET_STATUS[code] || TASK_STATUS[code])?.label ?? code;
+
+const statusLabel = (code) =>
+  (TICKET_STATUS[code] || TASK_STATUS[code])?.label ?? code;
 
 function translateDetail(msg) {
   if (LANG !== 'ar') return msg;
+
   const clean = msg.replace(/^Value error, /, '');
+
   if (EXACT[clean]) return EXACT[clean];
+
+  if (/^phone must be a valid Egyptian mobile number/.test(clean)) {
+    return tr("رقم الموبايل غير صحيح، مثال: 01012345678");
+  }
+
+  if (/^role must be one of/.test(clean)) {
+    return tr("الدور غير صحيح.");
+  }
+
   let m;
-  if ((m = clean.match(/^phone must be a valid Egyptian mobile number/))) return tr("رقم الموبايل غير صحيح، مثال: 01012345678");
-  if ((m = clean.match(/^role must be one of/))) return tr("الدور غير صحيح.");
-  if ((m = clean.match(/^Ticket is '(\w+)', not 'awaiting_approval'/))) return tr("حالة البلاغ الحالية «{s}» ولا يوجد قرار معلّق.", { s: statusLabel(m[1]) });
-  if ((m = clean.match(/^Ticket is '(\w+)', not 'assigned'/))) return tr("لا يمكن إسناد مهمة والبلاغ في حالة «{s}».", { s: statusLabel(m[1]) });
-  if ((m = clean.match(/^Ticket is '(\w+)', not 'submitted'/))) return tr("لا يمكن بدء المراجعة الآلية والبلاغ في حالة «{s}».", { s: statusLabel(m[1]) });
-  if ((m = clean.match(/^Task is '(\w+)', not 'pending_verification'/))) return tr("المهمة في حالة «{s}» وليست بانتظار التحقق.", { s: statusLabel(m[1]) });
-  if (/^This action requires one of roles/.test(clean)) return tr("لا تملك صلاحية تنفيذ هذا الإجراء.");
-  if (/^Role '.*' is not seeded/.test(clean)) return tr("الدور غير معرّف في النظام.");
+
+  if ((m = clean.match(/^Ticket is '(\w+)', not 'awaiting_approval'/))) {
+    return tr("حالة البلاغ الحالية «{s}» ولا يوجد قرار معلّق.", {
+      s: statusLabel(m[1]),
+    });
+  }
+
+  if ((m = clean.match(/^Ticket is '(\w+)', not 'assigned'/))) {
+    return tr("لا يمكن إسناد مهمة والبلاغ في حالة «{s}».", {
+      s: statusLabel(m[1]),
+    });
+  }
+
+  if ((m = clean.match(/^Ticket is '(\w+)', not 'submitted'/))) {
+    return tr("لا يمكن بدء المراجعة الآلية والبلاغ في حالة «{s}».", {
+      s: statusLabel(m[1]),
+    });
+  }
+
+  if ((m = clean.match(/^Task is '(\w+)', not 'pending_verification'/))) {
+    return tr("المهمة في حالة «{s}» وليست بانتظار التحقق.", {
+      s: statusLabel(m[1]),
+    });
+  }
+
+  if (/^This action requires one of roles/.test(clean)) {
+    return tr("لا تملك صلاحية تنفيذ هذا الإجراء.");
+  }
+
+  if (/^Role '.*' is not seeded/.test(clean)) {
+    return tr("الدور غير معرّف في النظام.");
+  }
+
   // Pydantic default messages
-  if (/^Field required/i.test(clean)) return tr("هذا الحقل مطلوب.");
-  if (/at least (\d+) characters/.test(clean)) return tr("النص أقصر من الحد الأدنى ({n} أحرف).", { n: clean.match(/at least (\d+)/)[1] });
-  if (/at most (\d+) characters/.test(clean)) return tr("النص أطول من الحد الأقصى ({n} حرفًا).", { n: clean.match(/at most (\d+)/)[1] });
-  if (/valid email/i.test(clean)) return tr("البريد الإلكتروني غير صحيح.");
-  if (/not a valid|Input should be/i.test(clean)) return tr("القيمة المُدخلة غير صحيحة.");
+  if (/^Field required/i.test(clean)) {
+    return tr("هذا الحقل مطلوب.");
+  }
+
+  if (/at least (\d+) characters/.test(clean)) {
+    return tr("النص أقصر من الحد الأدنى ({n} أحرف).", {
+      n: clean.match(/at least (\d+)/)[1],
+    });
+  }
+
+  if (/at most (\d+) characters/.test(clean)) {
+    return tr("النص أطول من الحد الأقصى ({n} حرفًا).", {
+      n: clean.match(/at most (\d+)/)[1],
+    });
+  }
+
+  if (/valid email/i.test(clean)) {
+    return tr("البريد الإلكتروني غير صحيح.");
+  }
+
+  if (/not a valid|Input should be/i.test(clean)) {
+    return tr("القيمة المُدخلة غير صحيحة.");
+  }
+
   // Any other English text: never show it in the Arabic UI.
-  return /[A-Za-z]{3,}/.test(clean) ? tr("تعذّر تنفيذ الطلب. حاول مرة أخرى.") : clean;
+  return /[A-Za-z]{3,}/.test(clean)
+    ? tr("تعذّر تنفيذ الطلب. حاول مرة أخرى.")
+    : clean;
 }
+
 // Turn any axios/FastAPI error into an Arabic-friendly string for toasts and error states.
 export function errorMessage(err, fallback = tr("حدث خطأ غير متوقع")) {
   if (!err) return fallback;
+
   if (err.code === 'ERR_NETWORK' || (!err.response && err.request)) {
     return tr("تعذّر الاتصال بالخادم. تأكد من اتصالك بالإنترنت ثم حاول مرة أخرى.");
   }
+
   const detail = err.response?.data?.detail;
-  if (typeof detail === 'string') return translateDetail(detail);
+
+  if (typeof detail === 'string') {
+    return translateDetail(detail);
+  }
+
   if (Array.isArray(detail)) {
     // Pydantic validation errors: [{ loc, msg }]
     return detail.map((d) => {
@@ -78,6 +157,7 @@ export function errorMessage(err, fallback = tr("حدث خطأ غير متوقع
       return `${FIELD[key] ?? key ?? tr("الحقل")}: ${translateDetail(d.msg)}`;
     }).join(tr("، "));
   }
+
   return LANG === 'ar' ? fallback : (err.message || fallback);
 }
 
@@ -88,4 +168,5 @@ export const httpStatus = (err) => err?.response?.status;
 // FastAPI answers an unknown route with exactly {"detail":"Not Found"} (404) or "Method Not Allowed" (405);
 // a real missing resource carries a specific detail ("Ticket not found"), so it is NOT treated as a missing route.
 export const isMissingEndpoint = (err) =>
-  httpStatus(err) === 405 || (httpStatus(err) === 404 && err.response?.data?.detail === 'Not Found');
+  httpStatus(err) === 405 ||
+  (httpStatus(err) === 404 && err.response?.data?.detail === 'Not Found');
