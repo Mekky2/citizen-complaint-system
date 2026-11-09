@@ -27,6 +27,7 @@ ALLOWED_TYPES = {
     "video/quicktime": ("video", ".mov"),
 }
 
+
 def detect_type(content_type: str | None):
     item = ALLOWED_TYPES.get((content_type or "").lower())
     if not item:
@@ -36,6 +37,7 @@ def detect_type(content_type: str | None):
         )
     return item
 
+
 def validate_signature(data: bytes, content_type: str):
     signatures = {
         "image/jpeg": lambda b: b.startswith(b"\xff\xd8\xff"),
@@ -44,7 +46,9 @@ def validate_signature(data: bytes, content_type: str):
         "audio/wav": lambda b: b.startswith(b"RIFF") and b[8:12] == b"WAVE",
         "audio/x-wav": lambda b: b.startswith(b"RIFF") and b[8:12] == b"WAVE",
         "audio/ogg": lambda b: b.startswith(b"OggS"),
-        "audio/mpeg": lambda b: b.startswith(b"ID3") or b[:2] in (b"\xff\xfb", b"\xff\xf3", b"\xff\xf2"),
+        "audio/mpeg": lambda b: (
+            b.startswith(b"ID3") or b[:2] in (b"\xff\xfb", b"\xff\xf3", b"\xff\xf2")
+        ),
         "audio/mp4": lambda b: len(b) >= 12 and b[4:8] == b"ftyp",
         "audio/webm": lambda b: b.startswith(b"\x1a\x45\xdf\xa3"),
         "video/mp4": lambda b: len(b) >= 12 and b[4:8] == b"ftyp",
@@ -57,6 +61,7 @@ def validate_signature(data: bytes, content_type: str):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="File content does not match its declared format",
         )
+
 
 async def save_upload(file: UploadFile, ticket_id: UUID, media_id: UUID):
     content_type = (file.content_type or "").lower().split(";", 1)[0].strip()
@@ -98,6 +103,7 @@ async def save_upload(file: UploadFile, ticket_id: UUID, media_id: UUID):
         destination.unlink(missing_ok=True)
         raise
 
+
 def find_media_file(ticket_id: UUID, media_id: UUID) -> Path | None:
     directory = UPLOAD_DIR / str(ticket_id)
     if not directory.is_dir():
@@ -105,6 +111,7 @@ def find_media_file(ticket_id: UUID, media_id: UUID) -> Path | None:
 
     matches = list(directory.glob(f"{media_id}.*"))
     return matches[0] if len(matches) == 1 and matches[0].is_file() else None
+
 
 def get_media_content_type(path: Path) -> str:
     return mimetypes.guess_type(path.name)[0] or "application/octet-stream"

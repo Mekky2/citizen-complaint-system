@@ -12,6 +12,7 @@ anything reaches the database, and the schema has no field that could hold a
 raw reasoning trace even if the AI service sent one — an extra field is
 silently dropped by Pydantic's default config, not persisted.
 """
+
 import uuid
 from datetime import datetime
 from typing import Literal
@@ -29,6 +30,7 @@ MAX_FACTORS = 10
 
 
 # --- Backend -> AI --------------------------------------------------------
+
 
 class AiRunTriggerMediaItem(BaseModel):
     type: Literal["image", "video", "audio"]
@@ -52,6 +54,7 @@ class AiRunTriggerOut(BaseModel):
 
 
 # --- AI -> Backend ---------------------------------------------------------
+
 
 class AiRecommendationPayload(BaseModel):
     category: str | None = None
@@ -144,6 +147,7 @@ class AiRecommendationCallbackIn(BaseModel):
 
 # --- Read models (what the Operations Room reads back) --------------------
 
+
 class AiEvidenceOut(BaseModel):
     model_config = {"from_attributes": True}
 
@@ -183,6 +187,7 @@ class AiRunOut(BaseModel):
 
 # --- Legal RAG boundary (FIX 3: POST /api/v1/ai/legal-search) -------------
 
+
 class LegalSearchIn(BaseModel):
     """
     The AI service sends an already-computed query embedding — this backend
@@ -213,6 +218,7 @@ class LegalSearchResultOut(BaseModel):
 
 
 # --- Similar Cases boundary (FIX 4: GET /api/v1/ai/similar-cases) ---------
+
 
 class SimilarCaseOut(BaseModel):
     """

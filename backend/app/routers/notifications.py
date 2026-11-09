@@ -1,4 +1,5 @@
 """GET/PATCH /api/v1/notifications/* — a user's own notifications only."""
+
 import uuid
 
 from fastapi import APIRouter, Depends, Query
@@ -32,4 +33,6 @@ def mark_read(
     current_user: CurrentUser = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> NotificationOut:
-    return notifications_service.mark_notification_read(db, notification_id, user_id=current_user.id)
+    return notifications_service.mark_notification_read(
+        db, notification_id, user_id=current_user.id
+    )

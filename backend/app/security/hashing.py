@@ -1,4 +1,5 @@
 """Password hashing — bcrypt via passlib. Never store or log a plaintext password."""
+
 from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

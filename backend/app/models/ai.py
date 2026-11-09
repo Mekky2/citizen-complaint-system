@@ -9,6 +9,7 @@ only be LEGAL_EVIDENCE (-> legal_knowledge_chunks) or SIMILAR_CASE
 app/services/evidence.py builds rows that satisfy this by construction, but
 the constraint is what actually guarantees it, even against a bug.
 """
+
 import uuid
 
 from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Integer, Numeric, Text, text
@@ -118,6 +119,8 @@ class SupervisorDecision(Base, UUIDPKMixin, TimestampMixin):
     supervisor_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
     )
-    action: Mapped[DecisionAction] = mapped_column(pg_enum(DecisionAction, "decision_action_enum"), nullable=False)
+    action: Mapped[DecisionAction] = mapped_column(
+        pg_enum(DecisionAction, "decision_action_enum"), nullable=False
+    )
     changed_fields: Mapped[dict | None] = mapped_column(JSONB)
     reason: Mapped[str | None] = mapped_column(Text)

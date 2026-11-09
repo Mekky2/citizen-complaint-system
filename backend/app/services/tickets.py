@@ -3,6 +3,7 @@ Business logic for /api/v1/tickets: creation, media, reads, and the one
 status-transition helper every other service (supervisor, maintenance,
 verification, ai) composes into its own transaction.
 """
+
 import uuid
 
 from fastapi import HTTPException, status
@@ -31,11 +32,16 @@ def create_ticket(db: Session, payload: TicketCreateIn, *, citizen_id: uuid.UUID
 
     db.add(
         TicketStatusHistory(
-            ticket_id=ticket.id, from_status=None, to_status=TicketStatus.submitted,
-            changed_by=citizen_id, reason="Ticket created",
+            ticket_id=ticket.id,
+            from_status=None,
+            to_status=TicketStatus.submitted,
+            changed_by=citizen_id,
+            reason="Ticket created",
         )
     )
-    write_audit_log(db, actor_id=citizen_id, action="create_ticket", entity_type="ticket", entity_id=ticket.id)
+    write_audit_log(
+        db, actor_id=citizen_id, action="create_ticket", entity_type="ticket", entity_id=ticket.id
+    )
 
     db.commit()
     db.refresh(ticket)
@@ -53,7 +59,12 @@ def get_ticket(db: Session, ticket_id: uuid.UUID, *, with_details: bool = False)
 
 
 def list_tickets(
-    db: Session, *, citizen_id: uuid.UUID | None, status_filter: TicketStatus | None, limit: int, offset: int
+    db: Session,
+    *,
+    citizen_id: uuid.UUID | None,
+    status_filter: TicketStatus | None,
+    limit: int,
+    offset: int,
 ) -> tuple[list[Ticket], int]:
     query = db.query(Ticket)
     if citizen_id is not None:
@@ -82,7 +93,11 @@ def add_ticket_media(
     )
     db.add(media)
     write_audit_log(
-        db, actor_id=actor_id, action="add_ticket_media", entity_type="ticket", entity_id=ticket.id,
+        db,
+        actor_id=actor_id,
+        action="add_ticket_media",
+        entity_type="ticket",
+        entity_id=ticket.id,
         after={"media_type": payload.type.value, "url": payload.url},
     )
     db.commit()
@@ -109,8 +124,11 @@ def transition_ticket_status(
     ticket.status = to_status
     db.add(
         TicketStatusHistory(
-            ticket_id=ticket.id, from_status=from_status, to_status=to_status,
-            changed_by=changed_by, reason=reason,
+            ticket_id=ticket.id,
+            from_status=from_status,
+            to_status=to_status,
+            changed_by=changed_by,
+            reason=reason,
         )
     )
     return ticket

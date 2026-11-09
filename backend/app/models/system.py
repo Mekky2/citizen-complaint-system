@@ -1,4 +1,5 @@
 """Models for: notifications, audit_logs (database/init/03_tables.sql, section 8)."""
+
 import uuid
 
 from sqlalchemy import DateTime, ForeignKey, Text

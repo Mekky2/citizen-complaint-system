@@ -23,6 +23,7 @@ from raising a 500 the moment two different embedding models' output ends
 up in the same table (an explicitly anticipated situation, per the
 database's own migration-path notes in database/init/04_indexes.sql).
 """
+
 import uuid
 
 from sqlalchemy.orm import Session

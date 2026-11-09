@@ -9,6 +9,7 @@ request, so the audit row is part of the same transaction as the business
 change it describes, never a separate one that could survive a rollback of
 the thing it is auditing.
 """
+
 import uuid
 
 from sqlalchemy.orm import Session

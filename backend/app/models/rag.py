@@ -9,6 +9,7 @@ model is finalized (see database/init/04_indexes.sql for the documented
 migration path once it is). Passing a dimension here would make SQLAlchemy's
 own type checking fight a column that is deliberately flexible.
 """
+
 import uuid
 
 from sqlalchemy import CheckConstraint, Date, ForeignKey, Integer, Text, UniqueConstraint
@@ -43,7 +44,9 @@ class LegalKnowledgeDocument(Base, UUIDPKMixin, TimestampMixin, UpdatedAtMixin):
 class LegalKnowledgeChunk(Base, UUIDPKMixin, TimestampMixin, UpdatedAtMixin):
     __tablename__ = "legal_knowledge_chunks"
     __table_args__ = (
-        UniqueConstraint("document_id", "chunk_index", name="legal_knowledge_chunks_doc_chunk_unique"),
+        UniqueConstraint(
+            "document_id", "chunk_index", name="legal_knowledge_chunks_doc_chunk_unique"
+        ),
         CheckConstraint(
             "embedding IS NULL OR embedding_dim IS NULL OR vector_dims(embedding) = embedding_dim",
             name="legal_knowledge_chunks_dim_check",
@@ -51,7 +54,9 @@ class LegalKnowledgeChunk(Base, UUIDPKMixin, TimestampMixin, UpdatedAtMixin):
     )
 
     document_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("legal_knowledge_documents.id", ondelete="CASCADE"), nullable=False
+        UUID(as_uuid=True),
+        ForeignKey("legal_knowledge_documents.id", ondelete="CASCADE"),
+        nullable=False,
     )
     chunk_index: Mapped[int] = mapped_column(Integer, nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
@@ -71,7 +76,10 @@ class TicketEmbedding(Base, UUIDPKMixin, TimestampMixin, UpdatedAtMixin):
     )
 
     ticket_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("tickets.id", ondelete="CASCADE"), nullable=False, unique=True
+        UUID(as_uuid=True),
+        ForeignKey("tickets.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,
     )
     content_hash: Mapped[str] = mapped_column(Text, nullable=False)
     embedding: Mapped[list[float] | None] = mapped_column(Vector(), nullable=True)

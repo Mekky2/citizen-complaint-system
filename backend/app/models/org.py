@@ -1,5 +1,6 @@
 """Models for: departments, maintenance_teams, maintenance_team_members, categories
 (database/init/03_tables.sql, sections 2-3)."""
+
 import uuid
 
 from sqlalchemy import DateTime, ForeignKey, Text, UniqueConstraint, text
@@ -19,7 +20,9 @@ class Department(Base, UUIDPKMixin, TimestampMixin, UpdatedAtMixin):
 
 class MaintenanceTeam(Base, UUIDPKMixin, TimestampMixin, UpdatedAtMixin):
     __tablename__ = "maintenance_teams"
-    __table_args__ = (UniqueConstraint("department_id", "name", name="maintenance_teams_dept_name_unique"),)
+    __table_args__ = (
+        UniqueConstraint("department_id", "name", name="maintenance_teams_dept_name_unique"),
+    )
 
     department_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("departments.id", ondelete="RESTRICT"), nullable=False
@@ -38,7 +41,9 @@ class MaintenanceTeamMember(Base):
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
     )
-    created_at: Mapped["object"] = mapped_column(DateTime(timezone=True), nullable=False, server_default=text("now()"))
+    created_at: Mapped["object"] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=text("now()")
+    )
 
     team: Mapped["MaintenanceTeam"] = relationship(back_populates="members")
 

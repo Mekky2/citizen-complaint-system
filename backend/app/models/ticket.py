@@ -1,4 +1,5 @@
 """Models for: tickets, ticket_media, ticket_status_history (database/init/03_tables.sql, section 3)."""
+
 import uuid
 
 from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Text, text
@@ -28,7 +29,9 @@ class Ticket(Base, UUIDPKMixin, TimestampMixin, UpdatedAtMixin):
     )
     severity: Mapped[Severity | None] = mapped_column(pg_enum(Severity, "severity_enum"))
     status: Mapped[TicketStatus] = mapped_column(
-        pg_enum(TicketStatus, "ticket_status_enum"), nullable=False, server_default=text("'submitted'")
+        pg_enum(TicketStatus, "ticket_status_enum"),
+        nullable=False,
+        server_default=text("'submitted'"),
     )
     title: Mapped[str | None] = mapped_column(Text)
     description: Mapped[str] = mapped_column(Text, nullable=False)
@@ -60,8 +63,12 @@ class TicketStatusHistory(Base, UUIDPKMixin, TimestampMixin):
     ticket_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("tickets.id", ondelete="CASCADE"), nullable=False
     )
-    from_status: Mapped[TicketStatus | None] = mapped_column(pg_enum(TicketStatus, "ticket_status_enum"))
-    to_status: Mapped[TicketStatus] = mapped_column(pg_enum(TicketStatus, "ticket_status_enum"), nullable=False)
+    from_status: Mapped[TicketStatus | None] = mapped_column(
+        pg_enum(TicketStatus, "ticket_status_enum")
+    )
+    to_status: Mapped[TicketStatus] = mapped_column(
+        pg_enum(TicketStatus, "ticket_status_enum"), nullable=False
+    )
     changed_by: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
     )

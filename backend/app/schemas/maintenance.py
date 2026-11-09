@@ -1,4 +1,5 @@
 """Schemas for /api/v1/maintenance and the admin-managed teams/members."""
+
 from datetime import datetime
 from uuid import UUID
 
@@ -88,6 +89,7 @@ class VerificationOut(BaseModel):
     verifier_id: UUID
     result: VerificationResult
     note: str | None
+
 
 class MaintenanceTeamMemberOut(BaseModel):
     user_id: UUID

@@ -7,6 +7,7 @@ maintenance task:
     app/services/maintenance.py:create_maintenance_task can open the next
     rework attempt (attempt_number + 1) against it.
 """
+
 import uuid
 
 from fastapi import HTTPException, status
@@ -24,14 +25,18 @@ def create_verification(
 ) -> Verification:
     task = db.get(MaintenanceTask, task_id)
     if task is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Maintenance task not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Maintenance task not found"
+        )
     if task.status != TaskStatus.pending_verification:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=f"Task is '{task.status.value}', not 'pending_verification'",
         )
 
-    verification = Verification(task_id=task.id, verifier_id=verifier_id, result=payload.result, note=payload.note)
+    verification = Verification(
+        task_id=task.id, verifier_id=verifier_id, result=payload.result, note=payload.note
+    )
     db.add(verification)
 
     ticket = get_ticket(db, task.ticket_id)
@@ -39,16 +44,27 @@ def create_verification(
 
     if payload.result == VerificationResult.pass_:
         transition_ticket_status(
-            db, ticket, to_status=TicketStatus.completed, changed_by=verifier_id, reason="Verification passed",
+            db,
+            ticket,
+            to_status=TicketStatus.completed,
+            changed_by=verifier_id,
+            reason="Verification passed",
         )
     else:
         transition_ticket_status(
-            db, ticket, to_status=TicketStatus.assigned, changed_by=verifier_id,
+            db,
+            ticket,
+            to_status=TicketStatus.assigned,
+            changed_by=verifier_id,
             reason=f"Verification failed ({payload.note or 'no note'}) — sent back for rework",
         )
 
     write_audit_log(
-        db, actor_id=verifier_id, action="create_verification", entity_type="maintenance_task", entity_id=task.id,
+        db,
+        actor_id=verifier_id,
+        action="create_verification",
+        entity_type="maintenance_task",
+        entity_id=task.id,
         after={"result": payload.result.value},
     )
 

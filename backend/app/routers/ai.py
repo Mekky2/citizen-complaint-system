@@ -88,10 +88,7 @@ def get_recommendation(
         confidence=recommendation.confidence,
         explanation=recommendation.explanation,
         factors=recommendation.factors,
-        evidence=[
-            AiEvidenceOut.model_validate(item)
-            for item in evidence
-        ],
+        evidence=[AiEvidenceOut.model_validate(item) for item in evidence],
     )
 
 
@@ -144,7 +141,4 @@ def legal_search(
         department_id=payload.department_id,
     )
 
-    return [
-        LegalSearchResultOut(**row)
-        for row in results
-    ]
+    return [LegalSearchResultOut(**row) for row in results]

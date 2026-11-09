@@ -6,6 +6,7 @@ they are SQLAlchemy's view of enum types that already exist in Postgres
 (create_type=False on every mapped column means SQLAlchemy never tries to
 CREATE TYPE; it only ever reads/writes values against the existing type).
 """
+
 import enum
 
 from sqlalchemy import Enum as SAEnum

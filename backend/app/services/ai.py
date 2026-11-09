@@ -26,6 +26,7 @@ brief:
    part of an AI recommendation's evidence, whether the AI service queries
    this backend for candidates first or not.
 """
+
 import uuid
 from datetime import datetime, timezone
 
@@ -178,9 +179,15 @@ async def trigger_ai_run(db: Session, ticket_id: uuid.UUID, *, actor_id: uuid.UU
     run = AiRun(ticket_id=ticket.id, status=AiRunStatus.pending)
     db.add(run)
     transition_ticket_status(
-        db, ticket, to_status=TicketStatus.under_ai_review, changed_by=actor_id, reason="AI run triggered",
+        db,
+        ticket,
+        to_status=TicketStatus.under_ai_review,
+        changed_by=actor_id,
+        reason="AI run triggered",
     )
-    write_audit_log(db, actor_id=actor_id, action="trigger_ai_run", entity_type="ticket", entity_id=ticket.id)
+    write_audit_log(
+        db, actor_id=actor_id, action="trigger_ai_run", entity_type="ticket", entity_id=ticket.id
+    )
     db.commit()
     db.refresh(run)
 
@@ -189,7 +196,9 @@ async def trigger_ai_run(db: Session, ticket_id: uuid.UUID, *, actor_id: uuid.UU
         description=ticket.description,
         category_hint=str(ticket.category_id) if ticket.category_id else None,
         media=[AiRunTriggerMediaItem(type=m.type.value, url=m.url) for m in ticket.media],
-        location=AiRunTriggerLocation(lat=ticket.lat, lng=ticket.lng, governorate=ticket.governorate),
+        location=AiRunTriggerLocation(
+            lat=ticket.lat, lng=ticket.lng, governorate=ticket.governorate
+        ),
     )
 
     try:
@@ -232,7 +241,10 @@ def process_ai_recommendation_callback(db: Session, payload: AiRecommendationCal
         run.error_message = payload.error_message
         ticket = get_ticket(db, run.ticket_id)
         transition_ticket_status(
-            db, ticket, to_status=TicketStatus.submitted, changed_by=None,
+            db,
+            ticket,
+            to_status=TicketStatus.submitted,
+            changed_by=None,
             reason=f"AI run failed: {payload.error_message}",
         )
         db.commit()
@@ -292,7 +304,10 @@ def process_ai_recommendation_callback(db: Session, payload: AiRecommendationCal
 
     ticket = get_ticket(db, run.ticket_id)
     transition_ticket_status(
-        db, ticket, to_status=TicketStatus.awaiting_approval, changed_by=None,
+        db,
+        ticket,
+        to_status=TicketStatus.awaiting_approval,
+        changed_by=None,
         reason="AI recommendation received — awaiting supervisor decision",
     )
 

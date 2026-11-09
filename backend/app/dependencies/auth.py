@@ -32,6 +32,7 @@ a value into (call /api/v1/auth/login via "Try it out" first, copy
 access_token, paste it there), which is what this API actually is — a plain
 bearer-token API, not an OAuth2 password-grant one.
 """
+
 import uuid
 from dataclasses import dataclass
 

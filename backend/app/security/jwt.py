@@ -45,6 +45,7 @@ a stolen ACCESS token works) and treat REFRESH_TOKEN_EXPIRE_MINUTES as the
 real exposure window for a stolen refresh token — shortening it in .env
 directly shrinks that window at the cost of forcing more frequent logins.
 """
+
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Literal
@@ -71,7 +72,9 @@ class InvalidTokenError(Exception):
     pass
 
 
-def _create_token(user_id: uuid.UUID, role: str, token_type: TokenType, expires_delta: timedelta) -> str:
+def _create_token(
+    user_id: uuid.UUID, role: str, token_type: TokenType, expires_delta: timedelta
+) -> str:
     now = datetime.now(timezone.utc)
     payload = {
         "sub": str(user_id),

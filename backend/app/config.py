@@ -4,6 +4,7 @@ Centralized application settings, loaded from environment variables / .env.
 Everything the app needs to know that varies by environment lives here and
 nowhere else — no module reaches into os.environ directly.
 """
+
 from functools import lru_cache
 
 from pydantic import Field

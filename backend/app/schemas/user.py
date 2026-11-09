@@ -1,4 +1,5 @@
 """Schemas for /api/v1/users and /api/v1/admin user management."""
+
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field, field_validator

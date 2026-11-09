@@ -1,11 +1,18 @@
 """/api/v1/admin/* — staff user management, departments, categories, audit log reads.
 Every route here is admin-only."""
+
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.dependencies.auth import CurrentUser, require_role
-from app.schemas.admin import AuditLogOut, CategoryCreateIn, CategoryOut, DepartmentCreateIn, DepartmentOut
+from app.schemas.admin import (
+    AuditLogOut,
+    CategoryCreateIn,
+    CategoryOut,
+    DepartmentCreateIn,
+    DepartmentOut,
+)
 from app.schemas.user import StaffCreateIn, UserOut
 from app.services import admin as admin_service
 from app.services import users as users_service
@@ -34,7 +41,8 @@ def create_department(
 
 @router.get("/departments", response_model=list[DepartmentOut])
 def list_departments(
-    current_user: CurrentUser = Depends(require_role("admin", "supervisor")), db: Session = Depends(get_db)
+    current_user: CurrentUser = Depends(require_role("admin", "supervisor")),
+    db: Session = Depends(get_db),
 ) -> list[DepartmentOut]:
     return admin_service.list_departments(db)
 
@@ -50,7 +58,8 @@ def create_category(
 
 @router.get("/categories", response_model=list[CategoryOut])
 def list_categories(
-    current_user: CurrentUser = Depends(require_role("admin", "supervisor")), db: Session = Depends(get_db)
+    current_user: CurrentUser = Depends(require_role("admin", "supervisor")),
+    db: Session = Depends(get_db),
 ) -> list[CategoryOut]:
     return admin_service.list_categories(db)
 
@@ -63,5 +72,7 @@ def list_audit_logs(
     current_user: CurrentUser = Depends(require_role("admin")),
     db: Session = Depends(get_db),
 ) -> list[AuditLogOut]:
-    rows, _total = admin_service.list_audit_logs(db, entity_type=entity_type, limit=limit, offset=offset)
+    rows, _total = admin_service.list_audit_logs(
+        db, entity_type=entity_type, limit=limit, offset=offset
+    )
     return rows

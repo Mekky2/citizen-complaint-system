@@ -30,6 +30,7 @@ is the correct FastAPI pattern for handlers that only do blocking DB I/O —
 FastAPI already runs those in a worker thread pool, so there is nothing to
 convert there.
 """
+
 import uuid
 
 import httpx

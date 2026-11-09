@@ -1,4 +1,5 @@
 """POST/GET /api/v1/auth/* — citizen self-registration, login, refresh, me."""
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 

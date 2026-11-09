@@ -4,6 +4,7 @@ classes (needed for relationship resolution and for Alembic's --autogenerate
 diffing, even though we never run create_all() against this metadata — see
 README "Database baseline").
 """
+
 from app.models.ai import (  # noqa: F401
     AiEvidence,
     AiRecommendation,

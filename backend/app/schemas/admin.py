@@ -1,4 +1,5 @@
 """Schemas for /api/v1/admin — departments, categories, audit log reads."""
+
 from datetime import datetime
 from uuid import UUID
 

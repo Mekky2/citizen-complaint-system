@@ -1,4 +1,4 @@
-﻿from getpass import getpass
+from getpass import getpass
 from app.db import SessionLocal
 from app.models.identity import User, Role, UserRole
 from app.security.hashing import hash_password
@@ -6,13 +6,7 @@ from app.security.hashing import hash_password
 db = SessionLocal()
 
 try:
-    existing = (
-        db.query(User)
-        .join(UserRole)
-        .join(Role)
-        .filter(Role.name == "admin")
-        .count()
-    )
+    existing = db.query(User).join(UserRole).join(Role).filter(Role.name == "admin").count()
 
     if existing:
         print("Admin already exists. Nothing changed.")

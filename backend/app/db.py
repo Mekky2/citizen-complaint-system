@@ -6,6 +6,7 @@ baseline"). Nothing in this module, or anywhere in app/models/, ever calls
 Base.metadata.create_all() — the schema was created by database/init/*.sql
 and the backend only ever maps onto it.
 """
+
 from collections.abc import Generator
 
 from sqlalchemy import create_engine, text

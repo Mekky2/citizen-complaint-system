@@ -1,4 +1,5 @@
 """Models for: users, roles, user_roles (database/init/03_tables.sql, section 1)."""
+
 import uuid
 
 from sqlalchemy import DateTime, ForeignKey, String, Text, text
@@ -37,7 +38,9 @@ class UserRole(Base):
     role_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("roles.id", ondelete="CASCADE"), primary_key=True
     )
-    created_at: Mapped["object"] = mapped_column(DateTime(timezone=True), nullable=False, server_default=text("now()"))
+    created_at: Mapped["object"] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=text("now()")
+    )
 
     user: Mapped["User"] = relationship(back_populates="role_links")
     role: Mapped["Role"] = relationship()

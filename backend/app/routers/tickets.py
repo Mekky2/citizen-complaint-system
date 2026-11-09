@@ -4,6 +4,7 @@ Visibility rule enforced in every handler below: a citizen sees only their
 own tickets; any staff role (supervisor/technician/admin) sees all of them.
 Creating a ticket is citizen-only — staff never file a ticket as themselves.
 """
+
 import uuid
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
@@ -14,7 +15,13 @@ from app.db import get_db
 from app.dependencies.auth import CurrentUser, get_current_user, require_role
 from app.models.enums import MediaType, TicketStatus
 from app.models.ticket import TicketMedia
-from app.schemas.ticket import TicketCreateIn, TicketDetailOut, TicketMediaCreateIn, TicketMediaOut, TicketOut
+from app.schemas.ticket import (
+    TicketCreateIn,
+    TicketDetailOut,
+    TicketMediaCreateIn,
+    TicketMediaOut,
+    TicketOut,
+)
 from app.services import tickets as tickets_service
 from app.services.media_storage import (
     save_upload,
@@ -56,14 +63,18 @@ def list_tickets(
 
 @router.get("/{ticket_id}", response_model=TicketDetailOut)
 def get_ticket(
-    ticket_id: uuid.UUID, current_user: CurrentUser = Depends(get_current_user), db: Session = Depends(get_db)
+    ticket_id: uuid.UUID,
+    current_user: CurrentUser = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ) -> TicketDetailOut:
     ticket = tickets_service.get_ticket(db, ticket_id, with_details=True)
     _assert_can_view(ticket, current_user)
     return ticket
 
 
-@router.post("/{ticket_id}/media", response_model=TicketMediaOut, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/{ticket_id}/media", response_model=TicketMediaOut, status_code=status.HTTP_201_CREATED
+)
 def add_ticket_media(
     ticket_id: uuid.UUID,
     payload: TicketMediaCreateIn,

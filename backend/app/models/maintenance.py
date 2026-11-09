@@ -1,4 +1,5 @@
 """Models for: maintenance_tasks, task_evidence, verifications (database/init/03_tables.sql, section 7)."""
+
 import uuid
 
 from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Integer, Text, UniqueConstraint, text
@@ -13,7 +14,9 @@ from app.models.mixins import TimestampMixin, UpdatedAtMixin, UUIDPKMixin
 class MaintenanceTask(Base, UUIDPKMixin, TimestampMixin, UpdatedAtMixin):
     __tablename__ = "maintenance_tasks"
     __table_args__ = (
-        UniqueConstraint("ticket_id", "attempt_number", name="maintenance_tasks_ticket_attempt_unique"),
+        UniqueConstraint(
+            "ticket_id", "attempt_number", name="maintenance_tasks_ticket_attempt_unique"
+        ),
         CheckConstraint("attempt_number >= 1", name="maintenance_tasks_attempt_positive_check"),
     )
 
@@ -31,14 +34,18 @@ class MaintenanceTask(Base, UUIDPKMixin, TimestampMixin, UpdatedAtMixin):
         pg_enum(TaskStatus, "task_status_enum"), nullable=False, server_default=text("'assigned'")
     )
     notes: Mapped[str | None] = mapped_column(Text)
-    assigned_at: Mapped["object"] = mapped_column(DateTime(timezone=True), nullable=False, server_default=text("now()"))
+    assigned_at: Mapped["object"] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=text("now()")
+    )
     started_at: Mapped["object"] = mapped_column(DateTime(timezone=True), nullable=True)
     completed_at: Mapped["object"] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class TaskEvidence(Base, UUIDPKMixin, TimestampMixin):
     __tablename__ = "task_evidence"
-    __table_args__ = (CheckConstraint("stage IN ('progress', 'after')", name="task_evidence_stage_check"),)
+    __table_args__ = (
+        CheckConstraint("stage IN ('progress', 'after')", name="task_evidence_stage_check"),
+    )
 
     task_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("maintenance_tasks.id", ondelete="CASCADE"), nullable=False

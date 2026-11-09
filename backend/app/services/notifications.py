@@ -6,6 +6,7 @@ changes, AI run completion, supervisor decisions) — it is not itself exposed
 as a public "create" endpoint; the router only lets a user list and mark-read
 their OWN notifications, never create one for anybody, including themselves.
 """
+
 import uuid
 from datetime import datetime, timezone
 
@@ -25,7 +26,9 @@ def create_notification(
     ticket_id: uuid.UUID | None = None,
     channel: NotificationChannel = NotificationChannel.in_app,
 ) -> Notification:
-    notification = Notification(user_id=user_id, ticket_id=ticket_id, channel=channel, title=title, body=body)
+    notification = Notification(
+        user_id=user_id, ticket_id=ticket_id, channel=channel, title=title, body=body
+    )
     db.add(notification)
     return notification
 
@@ -41,7 +44,9 @@ def list_notifications(
     return rows, total
 
 
-def mark_notification_read(db: Session, notification_id: uuid.UUID, *, user_id: uuid.UUID) -> Notification:
+def mark_notification_read(
+    db: Session, notification_id: uuid.UUID, *, user_id: uuid.UUID
+) -> Notification:
     notification = db.get(Notification, notification_id)
     if notification is None or notification.user_id != user_id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Notification not found")

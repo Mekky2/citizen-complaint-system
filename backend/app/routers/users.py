@@ -1,4 +1,5 @@
 """GET/PATCH /api/v1/users/* — self profile, and admin listing/updating of any user."""
+
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status

@@ -6,6 +6,7 @@ should never be able to mint or be mistaken for a citizen/staff session. It
 authenticates with a shared secret sent as a custom header, checked here
 before the request body is even parsed into the AI response schema.
 """
+
 from fastapi import Header, HTTPException, status
 
 from app.config import get_settings

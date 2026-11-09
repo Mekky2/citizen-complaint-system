@@ -25,6 +25,7 @@ exactly the "genuine compatibility/error issue" the task brief says to
 explain rather than silently paper over. Do not edit the generated
 migration to force it through; find out why the diff exists.
 """
+
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config, pool

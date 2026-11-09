@@ -7,6 +7,7 @@ confident the recommendation (app/services/ai.py stops at 'awaiting_approval'
 on success) — submit_decision() is the one and only place a ticket advances
 past it, whether the supervisor approves, edits, or rejects.
 """
+
 import uuid
 
 from fastapi import HTTPException, status
@@ -39,11 +40,15 @@ def submit_decision(
     changed_fields: dict = {}
 
     if payload.action in (DecisionAction.approve, DecisionAction.edit):
-        category_id = payload.category_id_override or (recommendation.category_id if recommendation else None)
+        category_id = payload.category_id_override or (
+            recommendation.category_id if recommendation else None
+        )
         department_id = payload.department_id_override or (
             recommendation.department_id if recommendation else None
         )
-        severity = payload.severity_override or (recommendation.severity if recommendation else None)
+        severity = payload.severity_override or (
+            recommendation.severity if recommendation else None
+        )
 
         if payload.action == DecisionAction.edit:
             if payload.category_id_override:
@@ -57,12 +62,19 @@ def submit_decision(
         ticket.department_id = department_id
         ticket.severity = severity
         transition_ticket_status(
-            db, ticket, to_status=TicketStatus.assigned, changed_by=supervisor_id,
+            db,
+            ticket,
+            to_status=TicketStatus.assigned,
+            changed_by=supervisor_id,
             reason=f"Supervisor {payload.action.value}d the AI recommendation",
         )
     else:  # reject
         transition_ticket_status(
-            db, ticket, to_status=TicketStatus.rejected, changed_by=supervisor_id, reason=payload.reason,
+            db,
+            ticket,
+            to_status=TicketStatus.rejected,
+            changed_by=supervisor_id,
+            reason=payload.reason,
         )
 
     decision = SupervisorDecision(
@@ -75,7 +87,11 @@ def submit_decision(
     )
     db.add(decision)
     write_audit_log(
-        db, actor_id=supervisor_id, action="supervisor_decision", entity_type="ticket", entity_id=ticket.id,
+        db,
+        actor_id=supervisor_id,
+        action="supervisor_decision",
+        entity_type="ticket",
+        entity_id=ticket.id,
         after={"action": payload.action.value},
     )
 

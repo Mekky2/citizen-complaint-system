@@ -1,4 +1,5 @@
 """Schemas for /api/v1/auth."""
+
 import re
 from uuid import UUID
 

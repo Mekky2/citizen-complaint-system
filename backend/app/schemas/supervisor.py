@@ -1,4 +1,5 @@
 """Schemas for /api/v1/supervisor."""
+
 from uuid import UUID
 
 from pydantic import BaseModel, field_validator

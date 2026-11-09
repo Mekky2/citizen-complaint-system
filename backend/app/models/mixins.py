@@ -10,6 +10,7 @@ server_default=text("gen_random_uuid()") / text("now()") means Postgres
 generates these values (exactly as the SQL files specify), not Python — the
 backend never has to guess a default that might drift from the database.
 """
+
 import uuid
 
 from sqlalchemy import DateTime, text

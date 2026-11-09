@@ -1,4 +1,3 @@
-
 """
 Business logic for /api/v1/maintenance: teams, team membership, task
 assignment (including rework attempts), task status updates, and task
@@ -78,10 +77,13 @@ def _assert_can_access_task(
         return
 
     if actor_role == TECHNICIAN_ROLE_NAME:
-        is_member = db.get(
-            MaintenanceTeamMember,
-            (task.team_id, actor_id),
-        ) is not None
+        is_member = (
+            db.get(
+                MaintenanceTeamMember,
+                (task.team_id, actor_id),
+            )
+            is not None
+        )
 
         if not is_member:
             raise HTTPException(
@@ -130,9 +132,7 @@ def list_teams(
     query = db.query(MaintenanceTeam)
 
     if department_id is not None:
-        query = query.filter(
-            MaintenanceTeam.department_id == department_id
-        )
+        query = query.filter(MaintenanceTeam.department_id == department_id)
 
     return query.order_by(MaintenanceTeam.name).all()
 

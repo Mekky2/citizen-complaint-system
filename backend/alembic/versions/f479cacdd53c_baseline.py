@@ -26,6 +26,7 @@ exists purely as the anchor `alembic stamp head` records, so any REAL future
 schema change (a column the AI team asks for later, say) has a proper
 baseline to generate its diff against.
 """
+
 from typing import Sequence, Union
 
 # revision identifiers, used by Alembic.

@@ -9,12 +9,23 @@ No router here (or anywhere in app/) ever calls Base.metadata.create_all():
 the schema is owned entirely by database/init/*.sql, and this file only
 mounts routes on top of it.
 """
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.db import check_database_connection
-from app.routers import admin, ai, auth, maintenance, notifications, supervisor, tickets, users, verification
+from app.routers import (
+    admin,
+    ai,
+    auth,
+    maintenance,
+    notifications,
+    supervisor,
+    tickets,
+    users,
+    verification,
+)
 
 settings = get_settings()
 

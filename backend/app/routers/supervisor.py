@@ -1,4 +1,5 @@
 """POST /api/v1/supervisor/* — the human-approval gate. Supervisor-only."""
+
 import uuid
 
 from fastapi import APIRouter, Depends, status
@@ -13,7 +14,9 @@ router = APIRouter(prefix="/api/v1/supervisor", tags=["supervisor"])
 
 
 @router.post(
-    "/tickets/{ticket_id}/decisions", response_model=SupervisorDecisionOut, status_code=status.HTTP_201_CREATED
+    "/tickets/{ticket_id}/decisions",
+    response_model=SupervisorDecisionOut,
+    status_code=status.HTTP_201_CREATED,
 )
 def submit_decision(
     ticket_id: uuid.UUID,

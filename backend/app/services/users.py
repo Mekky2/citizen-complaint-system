@@ -1,5 +1,6 @@
 """Business logic for /api/v1/users (self) and the admin-only staff management
 endpoints exposed under /api/v1/admin."""
+
 import uuid
 from datetime import datetime, timezone
 
@@ -36,7 +37,9 @@ def list_users(
     return [(user, role_name) for user, role_name in rows], total
 
 
-def create_staff_user(db: Session, payload: StaffCreateIn, *, created_by: uuid.UUID) -> tuple[User, str]:
+def create_staff_user(
+    db: Session, payload: StaffCreateIn, *, created_by: uuid.UUID
+) -> tuple[User, str]:
     """Admin-only: create a supervisor/technician/admin account. Citizens always
     self-register via app/services/auth.py:register_citizen — this path never
     creates a citizen, and StaffCreateIn's own validator already rejects role='citizen'."""
@@ -45,7 +48,8 @@ def create_staff_user(db: Session, payload: StaffCreateIn, *, created_by: uuid.U
         conditions.append(User.phone == payload.phone)
     if db.query(User).filter(or_(*conditions)).first() is not None:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="An account with this email or phone already exists"
+            status_code=status.HTTP_409_CONFLICT,
+            detail="An account with this email or phone already exists",
         )
 
     role = db.query(Role).filter(Role.name == payload.role).first()
@@ -66,7 +70,11 @@ def create_staff_user(db: Session, payload: StaffCreateIn, *, created_by: uuid.U
 
     db.add(UserRole(user_id=user.id, role_id=role.id))
     write_audit_log(
-        db, actor_id=created_by, action="create_staff_user", entity_type="user", entity_id=user.id,
+        db,
+        actor_id=created_by,
+        action="create_staff_user",
+        entity_type="user",
+        entity_id=user.id,
         after={"role": payload.role},
     )
 
@@ -75,13 +83,17 @@ def create_staff_user(db: Session, payload: StaffCreateIn, *, created_by: uuid.U
     return user, payload.role
 
 
-def update_user(db: Session, user_id: uuid.UUID, payload: UserUpdateIn, *, actor_id: uuid.UUID) -> User:
+def update_user(
+    db: Session, user_id: uuid.UUID, payload: UserUpdateIn, *, actor_id: uuid.UUID
+) -> User:
     user = db.get(User, user_id)
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     before = {
-        "name": user.name, "email": user.email, "phone": user.phone,
+        "name": user.name,
+        "email": user.email,
+        "phone": user.phone,
         "deactivated": user.deactivated_at is not None,
     }
 
@@ -97,12 +109,19 @@ def update_user(db: Session, user_id: uuid.UUID, payload: UserUpdateIn, *, actor
         user.deactivated_at = None
 
     after = {
-        "name": user.name, "email": user.email, "phone": user.phone,
+        "name": user.name,
+        "email": user.email,
+        "phone": user.phone,
         "deactivated": user.deactivated_at is not None,
     }
     write_audit_log(
-        db, actor_id=actor_id, action="update_user", entity_type="user", entity_id=user.id,
-        before=before, after=after,
+        db,
+        actor_id=actor_id,
+        action="update_user",
+        entity_type="user",
+        entity_id=user.id,
+        before=before,
+        after=after,
     )
 
     db.commit()

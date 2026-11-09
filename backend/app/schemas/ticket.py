@@ -1,4 +1,5 @@
 """Schemas for /api/v1/tickets."""
+
 from datetime import datetime
 from uuid import UUID
 

@@ -41,9 +41,7 @@ router = APIRouter(prefix="/api/v1/maintenance", tags=["maintenance"])
 )
 def create_team(
     payload: MaintenanceTeamCreateIn,
-    current_user: CurrentUser = Depends(
-        require_role("admin", "supervisor")
-    ),
+    current_user: CurrentUser = Depends(require_role("admin", "supervisor")),
     db: Session = Depends(get_db),
 ) -> MaintenanceTeamOut:
     return maintenance_service.create_team(
@@ -56,9 +54,7 @@ def create_team(
 @router.get("/teams", response_model=list[MaintenanceTeamOut])
 def list_teams(
     department_id: uuid.UUID | None = Query(default=None),
-    current_user: CurrentUser = Depends(
-        require_role("admin", "supervisor", "technician")
-    ),
+    current_user: CurrentUser = Depends(require_role("admin", "supervisor", "technician")),
     db: Session = Depends(get_db),
 ) -> list[MaintenanceTeamOut]:
     return maintenance_service.list_teams(
@@ -73,9 +69,7 @@ def list_teams(
 )
 def list_team_members(
     team_id: uuid.UUID,
-    current_user: CurrentUser = Depends(
-        require_role("admin", "supervisor")
-    ),
+    current_user: CurrentUser = Depends(require_role("admin", "supervisor")),
     db: Session = Depends(get_db),
 ) -> list[MaintenanceTeamMemberOut]:
     return maintenance_service.list_team_members(
@@ -91,9 +85,7 @@ def list_team_members(
 def add_team_member(
     team_id: uuid.UUID,
     payload: MaintenanceTeamMemberAddIn,
-    current_user: CurrentUser = Depends(
-        require_role("admin", "supervisor")
-    ),
+    current_user: CurrentUser = Depends(require_role("admin", "supervisor")),
     db: Session = Depends(get_db),
 ) -> dict:
     maintenance_service.add_team_member(
@@ -117,9 +109,7 @@ def add_team_member(
 def create_task(
     ticket_id: uuid.UUID,
     payload: MaintenanceTaskCreateIn,
-    current_user: CurrentUser = Depends(
-        require_role("admin", "supervisor")
-    ),
+    current_user: CurrentUser = Depends(require_role("admin", "supervisor")),
     db: Session = Depends(get_db),
 ) -> MaintenanceTaskOut:
     return maintenance_service.create_maintenance_task(
@@ -136,9 +126,7 @@ def create_task(
 )
 def list_tasks_for_ticket(
     ticket_id: uuid.UUID,
-    current_user: CurrentUser = Depends(
-        require_role("admin", "supervisor")
-    ),
+    current_user: CurrentUser = Depends(require_role("admin", "supervisor")),
     db: Session = Depends(get_db),
 ) -> list[MaintenanceTaskOut]:
     return maintenance_service.list_tasks_for_ticket(
@@ -152,9 +140,7 @@ def list_tasks_for_ticket(
     response_model=list[MaintenanceTaskOut],
 )
 def list_my_tasks(
-    current_user: CurrentUser = Depends(
-        require_role("technician")
-    ),
+    current_user: CurrentUser = Depends(require_role("technician")),
     db: Session = Depends(get_db),
 ) -> list[MaintenanceTaskOut]:
     """Every task belonging to any team this technician is a member of —
@@ -175,9 +161,7 @@ def list_my_tasks(
 def update_task_status(
     task_id: uuid.UUID,
     payload: MaintenanceTaskStatusUpdateIn,
-    current_user: CurrentUser = Depends(
-        require_role("technician", "supervisor", "admin")
-    ),
+    current_user: CurrentUser = Depends(require_role("technician", "supervisor", "admin")),
     db: Session = Depends(get_db),
 ) -> MaintenanceTaskOut:
     return maintenance_service.update_task_status(
@@ -198,9 +182,7 @@ def update_task_status(
 def add_task_evidence(
     task_id: uuid.UUID,
     payload: TaskEvidenceCreateIn,
-    current_user: CurrentUser = Depends(
-        require_role("technician", "supervisor", "admin")
-    ),
+    current_user: CurrentUser = Depends(require_role("technician", "supervisor", "admin")),
     db: Session = Depends(get_db),
 ) -> TaskEvidenceOut:
     return maintenance_service.add_task_evidence(

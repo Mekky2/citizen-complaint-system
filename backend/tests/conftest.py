@@ -15,6 +15,7 @@ A bootstrap admin is created once per test session, directly via the ORM
 (bypassing the API, since there is intentionally no API path that creates
 the first admin — see README "First admin account").
 """
+
 import uuid
 
 import pytest
@@ -60,7 +61,9 @@ def db():
     session.close()
 
 
-def _create_user_with_role(db, *, name: str, email: str, phone: str, password: str, role_name: str) -> uuid.UUID:
+def _create_user_with_role(
+    db, *, name: str, email: str, phone: str, password: str, role_name: str
+) -> uuid.UUID:
     role = db.query(Role).filter(Role.name == role_name).first()
     assert role is not None, f"role '{role_name}' is not seeded — check database/init/06_seed.sql"
     user = User(name=name, email=email, phone=phone, password_hash=hash_password(password))
@@ -88,7 +91,9 @@ def admin_token(client: TestClient, db) -> str:
     email = f"admin.{suffix}@example.com"
     phone = f"010{unique_digits(8)}"
     password = "AdminPass123"
-    _create_user_with_role(db, name="Test Admin", email=email, phone=phone, password=password, role_name="admin")
+    _create_user_with_role(
+        db, name="Test Admin", email=email, phone=phone, password=password, role_name="admin"
+    )
     return login(client, email, password)
 
 
@@ -99,8 +104,13 @@ def supervisor_token(client: TestClient, admin_token: str) -> str:
     resp = client.post(
         "/api/v1/admin/staff",
         headers=auth_headers(admin_token),
-        json={"name": "Test Supervisor", "email": email, "phone": f"011{unique_digits(8)}",
-              "password": "SupPass123", "role": "supervisor"},
+        json={
+            "name": "Test Supervisor",
+            "email": email,
+            "phone": f"011{unique_digits(8)}",
+            "password": "SupPass123",
+            "role": "supervisor",
+        },
     )
     assert resp.status_code == 201, resp.text
     return login(client, email, "SupPass123")
@@ -156,8 +166,13 @@ def make_technician(client: TestClient, admin_token: str) -> tuple[str, str, str
     resp = client.post(
         "/api/v1/admin/staff",
         headers=auth_headers(admin_token),
-        json={"name": "Test Technician", "email": email, "phone": f"015{unique_digits(8)}",
-              "password": "TechPass123", "role": "technician"},
+        json={
+            "name": "Test Technician",
+            "email": email,
+            "phone": f"015{unique_digits(8)}",
+            "password": "TechPass123",
+            "role": "technician",
+        },
     )
     assert resp.status_code == 201, resp.text
     user_id = resp.json()["id"]
@@ -196,7 +211,9 @@ def create_pending_ai_run(db, ticket_id: str) -> str:
     return str(run.id)
 
 
-def approve_ticket_to_assigned(client: TestClient, db, *, ticket_id: str, supervisor_token: str, ai_secret: str) -> None:
+def approve_ticket_to_assigned(
+    client: TestClient, db, *, ticket_id: str, supervisor_token: str, ai_secret: str
+) -> None:
     """Drives a freshly 'under_ai_review' ticket through a successful AI
     callback and a supervisor approval, landing it at status='assigned' —
     the precondition for creating a maintenance task."""
@@ -205,8 +222,14 @@ def approve_ticket_to_assigned(client: TestClient, db, *, ticket_id: str, superv
         "/api/v1/ai/recommendations",
         headers={"X-AI-Service-Secret": ai_secret},
         json={
-            "run_id": run_id, "ticket_id": ticket_id, "status": "succeeded",
-            "recommendation": {"severity": "medium", "confidence": 0.8, "explanation": "pytest-seeded"},
+            "run_id": run_id,
+            "ticket_id": ticket_id,
+            "status": "succeeded",
+            "recommendation": {
+                "severity": "medium",
+                "confidence": 0.8,
+                "explanation": "pytest-seeded",
+            },
         },
     )
     assert resp.status_code == 200, resp.text
@@ -219,20 +242,30 @@ def approve_ticket_to_assigned(client: TestClient, db, *, ticket_id: str, superv
     assert resp.status_code == 201, resp.text
 
 
-def create_assigned_ticket(client: TestClient, db, *, citizen_token: str, supervisor_token: str, ai_secret: str) -> str:
+def create_assigned_ticket(
+    client: TestClient, db, *, citizen_token: str, supervisor_token: str, ai_secret: str
+) -> str:
     """Full pipeline: citizen creates a ticket -> supervisor triggers AI review
     -> (simulated) AI recommendation -> supervisor approves. Returns a
     ticket_id sitting at status='assigned', ready for a maintenance task."""
     resp = client.post(
         "/api/v1/tickets",
         headers=auth_headers(citizen_token),
-        json={"description": "Pytest-seeded ticket for the maintenance pipeline", "lat": 30.1, "lng": 31.1},
+        json={
+            "description": "Pytest-seeded ticket for the maintenance pipeline",
+            "lat": 30.1,
+            "lng": 31.1,
+        },
     )
     assert resp.status_code == 201, resp.text
     ticket_id = resp.json()["id"]
 
-    resp = client.post(f"/api/v1/ai/tickets/{ticket_id}/trigger", headers=auth_headers(supervisor_token))
+    resp = client.post(
+        f"/api/v1/ai/tickets/{ticket_id}/trigger", headers=auth_headers(supervisor_token)
+    )
     assert resp.status_code == 201, resp.text
 
-    approve_ticket_to_assigned(client, db, ticket_id=ticket_id, supervisor_token=supervisor_token, ai_secret=ai_secret)
+    approve_ticket_to_assigned(
+        client, db, ticket_id=ticket_id, supervisor_token=supervisor_token, ai_secret=ai_secret
+    )
     return ticket_id

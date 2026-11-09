@@ -1,4 +1,5 @@
 """Shared Pydantic building blocks used across every schema module."""
+
 from datetime import datetime
 from uuid import UUID
 

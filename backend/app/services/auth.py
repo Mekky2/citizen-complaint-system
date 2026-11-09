@@ -5,6 +5,7 @@ Staff accounts (supervisor/technician/admin) are never created here — only
 app/services/users.py (an admin-only path) creates those. This module only
 ever assigns the 'citizen' role.
 """
+
 import uuid
 
 from fastapi import HTTPException, status
@@ -98,7 +99,9 @@ def login(db: Session, payload: LoginIn) -> dict:
 
 
 def refresh_access_token(db: Session, refresh_token: str) -> dict:
-    invalid = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
+    invalid = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token"
+    )
 
     try:
         payload = decode_token(refresh_token, expected_type="refresh")
