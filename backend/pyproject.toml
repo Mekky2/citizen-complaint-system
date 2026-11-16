@@ -7,6 +7,7 @@ dependencies = [
   "uvicorn[standard]>=0.29",
   "pydantic-settings>=2.2",
   "langgraph>=1.2.11",
+  "openai>=1.40",
 ]
 
 [project.optional-dependencies]
@@ -21,6 +22,8 @@ include = ["app*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
+markers = ["live: calls the real NVIDIA NIM API; skipped unless LLM_API_KEY is configured"]
 
 [tool.ruff]
 line-length = 100
