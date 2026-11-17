@@ -17,7 +17,11 @@ class Settings(BaseSettings):
     storage_backend: str = "local"
     storage_local_path: str = "./data/uploads"
 
+    llm_provider: str = "nvidia_nim"
+    llm_model: str = "mistralai/mistral-large-4-1t-a52b"
+    llm_base_url: str = "https://integrate.api.nvidia.com/v1"
     llm_api_key: str = ""
+    llm_timeout_seconds: int = 120
 
     # Tool-call limiting (docs/system_architecture.md)
     tool_call_limit_per_ticket: int = 8
