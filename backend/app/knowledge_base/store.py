@@ -105,6 +105,8 @@ class InMemoryKnowledgeBase:
         self._bm25: BM25Index | None = None
         self._bm25_tokens: list[list[str]] = []
         self._title_tokens: list[list[str]] = []
+        # Bumped whenever a document changes. The answer cache uses it to invalidate itself.
+        self.version = 0
 
     # ------------------------------------------------------------- ingestion
     def add_document(self, document: KnowledgeDocument) -> str:
@@ -137,6 +139,7 @@ class InMemoryKnowledgeBase:
         }
         self.chunks.extend(rows)
         self._bm25 = None  # invalidate the lexical index
+        self.version += 1
         status = "updated" if existing else "inserted"
         self.last_ingest[document.source] = status
         return status
