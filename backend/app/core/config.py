@@ -45,6 +45,9 @@ class Settings(BaseSettings):
     # Browser origins allowed to call the API (comma-separated). Used by CORS middleware.
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
 
+    # Duplicate complaint detection (Jaccard/overlap mix over normalized Arabic tokens).
+    duplicate_similarity_threshold: float = 0.45
+
     @property
     def cors_origin_list(self) -> list[str]:
         raw = self.cors_origins or "http://localhost:5173,http://127.0.0.1:5173"

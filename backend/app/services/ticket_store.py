@@ -44,6 +44,29 @@ OPEN_STATUSES = frozenset(
     {STATUS_PENDING, STATUS_APPROVED, STATUS_IN_PROGRESS, STATUS_VERIFYING}
 )
 
+# Tokens that describe the act of complaining rather than the problem itself. They are
+# ignored when comparing descriptions so a filler prefix such as "في مشكلة ..." does not
+# stop duplicate detection. Values are already normalized/stemmed by tokenize_for_search.
+DUPLICATE_IGNORED_TOKENS = frozenset(
+    {
+        "مشكله",
+        "شكوى",
+        "شكوه",
+        "بلاغ",
+        "ابلاغ",
+        "مشاكل",
+        "موضوع",
+        "بخصوص",
+    }
+)
+
+# A duplicate needs at least this many shared problem tokens. One shared word such as
+# "مياه" is too weak a signal to offer a link.
+MIN_DUPLICATE_SHARED_TOKENS = 2
+
+# Default mix of Jaccard and overlap similarity; overridable through settings.
+DEFAULT_DUPLICATE_THRESHOLD = 0.45
+
 # Exact transitions from the architecture document. Declined is normally set by the
 # Orchestrator during validation and is kept here so the store is the single source of truth.
 ALLOWED_TRANSITIONS: dict[str, frozenset[str]] = {
@@ -198,10 +221,17 @@ class InMemoryTicketStore:
         category: str,
         description: str,
         location: dict[str, str] | None = None,
-        threshold: float = 0.45,
+        threshold: float | None = None,
     ) -> tuple[Ticket, float] | None:
-        """Return the most similar open ticket in the same category, if any."""
-        query_tokens = set(tokenize_for_search(description))
+        """Return the most similar open ticket in the same category, if any.
+
+        Similarity is the better of Jaccard and the overlap (containment) coefficient over
+        normalized Arabic tokens. The overlap side tolerates filler prefixes, and
+        ``MIN_DUPLICATE_SHARED_TOKENS`` stops a single shared word from counting as a match.
+        """
+        if threshold is None:
+            threshold = _threshold_from_settings()
+        query_tokens = _duplicate_tokens(description)
         if not query_tokens:
             return None
         location = location or {}
@@ -212,10 +242,10 @@ class InMemoryTicketStore:
                 continue
             if not _nearby(location, ticket.location):
                 continue
-            other = set(tokenize_for_search(ticket.description))
-            if not other:
+            other = _duplicate_tokens(ticket.description)
+            if len(query_tokens & other) < MIN_DUPLICATE_SHARED_TOKENS:
                 continue
-            similarity = len(query_tokens & other) / len(query_tokens | other)
+            similarity = duplicate_similarity(query_tokens, other)
             if similarity >= threshold and (best is None or similarity > best[1]):
                 best = (ticket, round(similarity, 4))
         return best
@@ -224,6 +254,36 @@ class InMemoryTicketStore:
         with self._lock:
             self._tickets.clear()
             self._counter = 0
+
+
+def _duplicate_tokens(text: str) -> set[str]:
+    """Normalize a description into comparable tokens, dropping complaint filler words."""
+    return set(tokenize_for_search(text or "")) - DUPLICATE_IGNORED_TOKENS
+
+
+def duplicate_similarity(left: set[str], right: set[str]) -> float:
+    """Return the better of Jaccard and overlap (containment) similarity.
+
+    Jaccard punishes a longer description that carries a filler prefix, while the overlap
+    coefficient compares against the shorter side and recovers that case. The overlap value
+    alone would score a one-word query at 1.0, so callers also require
+    ``MIN_DUPLICATE_SHARED_TOKENS`` shared tokens.
+    """
+    if not left or not right:
+        return 0.0
+    shared = len(left & right)
+    if not shared:
+        return 0.0
+    jaccard = shared / len(left | right)
+    overlap = shared / min(len(left), len(right))
+    return max(jaccard, overlap)
+
+
+def _threshold_from_settings() -> float:
+    """Read the duplicate threshold from settings without importing it at module load."""
+    from app.core.config import get_settings
+
+    return get_settings().duplicate_similarity_threshold
 
 
 def _nearby(left: dict[str, str], right: dict[str, str]) -> bool:
