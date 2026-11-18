@@ -14,6 +14,7 @@ available the deterministic extractor is used, which keeps tests and demos offli
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import re
@@ -669,6 +670,22 @@ def _confirmation_response(session: ComplaintSession, store: InMemoryTicketStore
     return _response(session, reply, requires_confirmation=True)
 
 
+def _draft_fingerprint(draft: ComplaintDraft) -> str:
+    """Stable key for the submitted draft (no request id, so retries deduplicate)."""
+    payload = "|".join(
+        [
+            draft.title,
+            draft.description,
+            draft.category or "",
+            draft.location.governorate,
+            draft.location.city,
+            draft.location.street,
+            draft.location.landmark,
+        ]
+    )
+    return hashlib.sha1(payload.encode("utf-8")).hexdigest()
+
+
 def _submit(session: ComplaintSession, store: InMemoryTicketStore) -> dict[str, Any]:
     draft = session.draft
     current = store.get(session.pending_duplicate_id) if session.pending_duplicate_id else None
@@ -694,6 +711,8 @@ def _submit(session: ComplaintSession, store: InMemoryTicketStore) -> dict[str, 
         contact_preference=draft.contact_preference,
         linked_to=current.ticket_id if current else None,
         review_notes=[f"MISSING_FIELD:{field}" for field in draft.missing_fields],
+        # A client retry or a double confirmation of the same draft returns the same ticket.
+        idempotency_key=f"{session.session_id}:{_draft_fingerprint(draft)}",
     )
     session.stage = "submitted"
     session.ticket = to_public_dict(ticket)

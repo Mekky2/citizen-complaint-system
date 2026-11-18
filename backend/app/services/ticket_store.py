@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import threading
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -107,11 +107,38 @@ class Ticket(BaseModel):
     review_notes: list[str] = Field(default_factory=list)
 
 
+class TicketRepository(Protocol):
+    """Storage seam. A Supabase/Postgres repository implements the same five methods.
+
+    ``create`` accepts an ``idempotency_key`` so a client retry, or the citizen confirming
+    twice, returns the ticket that already exists instead of creating a second one. The
+    database implementation should enforce it with a unique index.
+    """
+
+    def create(self, **kwargs: Any) -> Ticket: ...
+
+    def get(self, ticket_id: str) -> Ticket | None: ...
+
+    def list(self) -> list[Ticket]: ...
+
+    def update_status(self, ticket_id: str, status: str) -> Ticket | None: ...
+
+    def find_similar(
+        self,
+        *,
+        category: str,
+        description: str,
+        location: dict[str, str] | None = None,
+        threshold: float | None = None,
+    ) -> tuple[Ticket, float] | None: ...
+
+
 class InMemoryTicketStore:
     """Thread-safe in-memory ticket repository."""
 
     def __init__(self) -> None:
         self._tickets: dict[str, Ticket] = {}
+        self._idempotency: dict[str, str] = {}
         self._counter = 0
         self._lock = threading.Lock()
 
@@ -134,9 +161,15 @@ class InMemoryTicketStore:
         contact_preference: str | None = None,
         linked_to: str | None = None,
         review_notes: list[str] | None = None,
+        idempotency_key: str | None = None,
     ) -> Ticket:
         now = datetime.now(UTC).isoformat()
         with self._lock:
+            if idempotency_key:
+                existing_id = self._idempotency.get(idempotency_key)
+                existing = self._tickets.get(existing_id) if existing_id else None
+                if existing is not None:
+                    return existing
             ticket = Ticket(
                 ticket_id=self._next_id(),
                 title=title,
@@ -156,13 +189,17 @@ class InMemoryTicketStore:
                 review_notes=review_notes or [],
             )
             self._tickets[ticket.ticket_id] = ticket
+            if idempotency_key:
+                self._idempotency[idempotency_key] = ticket.ticket_id
             return ticket
 
     def get(self, ticket_id: str) -> Ticket | None:
-        return self._tickets.get(ticket_id)
+        with self._lock:
+            return self._tickets.get(ticket_id)
 
     def list(self) -> list[Ticket]:
-        return list(self._tickets.values())
+        with self._lock:
+            return list(self._tickets.values())
 
     def update_status(self, ticket_id: str, status: str) -> Ticket | None:
         """Apply a lifecycle transition, enforcing the documented state machine."""
@@ -237,7 +274,9 @@ class InMemoryTicketStore:
         location = location or {}
 
         best: tuple[Ticket, float] | None = None
-        for ticket in self._tickets.values():
+        with self._lock:
+            candidates = list(self._tickets.values())
+        for ticket in candidates:
             if ticket.status not in OPEN_STATUSES or ticket.category != category:
                 continue
             if not _nearby(location, ticket.location):
@@ -253,6 +292,7 @@ class InMemoryTicketStore:
     def clear(self) -> None:
         with self._lock:
             self._tickets.clear()
+            self._idempotency.clear()
             self._counter = 0
 
 

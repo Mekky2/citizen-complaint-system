@@ -1,4 +1,4 @@
-"""Public API routes for the two agents.
+"""Public API routes for the agents.
 
 ``POST /api/v1/chat`` is the single entry point used by the frontend:
 
@@ -7,22 +7,28 @@
 
 Both paths are human-in-the-loop: a ticket is only created after the citizen confirms, and it
 starts as ``Pending``.
+
+Load protection: a per-client sliding window returns ``429`` and a bounded in-flight gate
+returns ``503``, both with ``Retry-After`` and an Arabic message. Neither can produce a 500.
 """
 
 from __future__ import annotations
 
+import asyncio
+import logging
 from typing import Any, Literal
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 
-from app.agents.complaint_agent.conversation import handle_message, looks_like_complaint
+from app.services.observability import log_request, reset_trace, start_trace
 from app.services.runtime import get_runtime
 from app.services.ticket_store import InvalidStatusTransition, to_public_dict
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/api/v1", tags=["agents"])
 
-ACTIVE_COMPLAINT_STAGES = {"collecting", "awaiting_confirmation"}
 TicketStatus = Literal[
     "Declined",
     "Pending",
@@ -32,6 +38,10 @@ TicketStatus = Literal[
     "Verifying",
     "Done",
 ]
+
+BUSY_RATE_LIMIT = "عدد الطلبات كبير حاليًا. يُرجى المحاولة بعد قليل."
+BUSY_OVERLOAD = "الخدمة مشغولة حاليًا. يُرجى المحاولة بعد لحظات."
+INTERNAL_FALLBACK = "تعذّر إكمال الطلب الآن. يُرجى المحاولة مرة أخرى بعد قليل."
 
 
 class ChatRequest(BaseModel):
@@ -59,6 +69,9 @@ class ChatResponse(BaseModel):
     confidence: str | None = None
     found_in_kb: bool | None = None
     review_notes: list[str] = Field(default_factory=list)
+    # True when the answer came from the offline fallback (all providers down/busy/over budget).
+    degraded: bool = False
+    request_id: str | None = None
 
 
 class ReviewRequest(BaseModel):
@@ -67,95 +80,63 @@ class ReviewRequest(BaseModel):
 
 
 @router.post("/chat", response_model=ChatResponse)
-def chat(request: ChatRequest) -> ChatResponse:
+async def chat(request: ChatRequest, http_request: Request, response: Response) -> ChatResponse:
     runtime = get_runtime()
-    session = runtime.session(request.session_id)
-    rag = runtime.rag_agent()
 
-    if session.stage in ACTIVE_COMPLAINT_STAGES:
-        return _complaint_turn(request, session, rag)
-
-    intent = rag.detect_intent(request.message)
-    if intent in {"complaint"} or looks_like_complaint(request.message):
-        return _complaint_turn(request, session, rag)
-
-    return _rag_turn(request, rag)
-
-
-def _complaint_turn(request: ChatRequest, session, rag) -> ChatResponse:
-    runtime = get_runtime()
-    result = handle_message(
-        session,
-        request.message,
-        llm=runtime.llm,
-        store=runtime.ticket_store,
-        emergency_numbers=runtime.emergency_numbers,
-    )
-
-    # The complaint agent hands questions/procedures to the RAG agent.
-    if result.get("handoff_to") == "rag":
-        rag_result = rag.run(
-            {
-                "query": request.message,
-                "ticket_id": f"SESSION-{request.session_id}",
-                "session_id": request.session_id,
-                "conversation_history": [],
-                "tool_calls": 0,
-            }
-        )
-        return ChatResponse(
-            type="rag",
-            session_id=request.session_id,
-            reply_ar=rag_result["answer"],
-            stage=session.stage,
-            handoff_to="rag",
-            sources=[SourceOut(**source.model_dump()) for source in rag_result["sources"]],
-            confidence=rag_result["confidence"],
-            found_in_kb=rag_result["found_in_kb"],
-            review_notes=rag_result["review_notes"],
+    client_id = request.user_id or _client_id(http_request)
+    allowed, retry_after = runtime.rate_limiter.allow(client_id)
+    if not allowed:
+        raise HTTPException(
+            status_code=429,
+            detail=BUSY_RATE_LIMIT,
+            headers={"Retry-After": str(int(max(1, retry_after)))},
         )
 
-    return ChatResponse(
-        type="complaint",
-        session_id=request.session_id,
-        reply_ar=result["reply_ar"],
-        stage=result["stage"],
-        ticket=result.get("ticket"),
-        missing_fields=result.get("missing_fields", []),
-        requires_confirmation=result.get("requires_confirmation", False),
-        handoff_to=result.get("handoff_to"),
-        review_notes=result.get("review_notes", []),
+    acquired = await asyncio.to_thread(
+        runtime.request_gate.acquire, runtime.settings.api_queue_timeout_seconds
     )
+    if not acquired:
+        raise HTTPException(
+            status_code=503,
+            detail=BUSY_OVERLOAD,
+            headers={"Retry-After": "2"},
+        )
+
+    trace = start_trace()
+    try:
+        result = await asyncio.to_thread(
+            runtime.chat, request.message, request.session_id, request.user_id
+        )
+    except Exception:  # noqa: BLE001 - a request must never surface a 500/stack trace
+        logger.error("chat failed type=%s request_id=%s", "UnhandledError", trace.request_id)
+        raise HTTPException(status_code=503, detail=INTERNAL_FALLBACK) from None
+    finally:
+        runtime.request_gate.release()
+
+    log_request(
+        trace,
+        path="/api/v1/chat",
+        type=result.get("type"),
+        stage=result.get("stage"),
+    )
+    response.headers["X-Request-ID"] = trace.request_id
+    reset_trace()
+    return ChatResponse(**result)
 
 
-def _rag_turn(request: ChatRequest, rag) -> ChatResponse:
-    result = rag.run(
-        {
-            "query": request.message,
-            "ticket_id": f"SESSION-{request.session_id}",
-            "session_id": request.session_id,
-            "conversation_history": [],
-            "tool_calls": 0,
-        }
-    )
-    return ChatResponse(
-        type="rag",
-        session_id=request.session_id,
-        reply_ar=result["answer"],
-        sources=[SourceOut(**source.model_dump()) for source in result["sources"]],
-        confidence=result["confidence"],
-        found_in_kb=result["found_in_kb"],
-        review_notes=result["review_notes"],
-    )
+def _client_id(request: Request) -> str:
+    if request.client and request.client.host:
+        return request.client.host
+    return "unknown"
 
 
 @router.get("/tickets")
-def list_tickets() -> list[dict[str, Any]]:
+async def list_tickets() -> list[dict[str, Any]]:
     return [to_public_dict(ticket) for ticket in get_runtime().ticket_store.list()]
 
 
 @router.get("/tickets/{ticket_id}")
-def get_ticket(ticket_id: str) -> dict[str, Any]:
+async def get_ticket(ticket_id: str) -> dict[str, Any]:
     ticket = get_runtime().ticket_store.get(ticket_id)
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
@@ -163,7 +144,7 @@ def get_ticket(ticket_id: str) -> dict[str, Any]:
 
 
 @router.post("/tickets/{ticket_id}/review")
-def review_ticket(ticket_id: str, request: ReviewRequest) -> dict[str, Any]:
+async def review_ticket(ticket_id: str, request: ReviewRequest) -> dict[str, Any]:
     store = get_runtime().ticket_store
     ticket = store.get(ticket_id)
     if not ticket:
@@ -181,12 +162,19 @@ def review_ticket(ticket_id: str, request: ReviewRequest) -> dict[str, Any]:
 
 
 @router.get("/knowledge/status")
-def knowledge_status() -> dict[str, Any]:
+async def knowledge_status() -> dict[str, Any]:
     runtime = get_runtime()
     return {
         "documents": len(runtime.knowledge_base.documents),
         "chunks": runtime.knowledge_base.chunk_count,
         "embedding_provider": runtime.settings.embedding_provider,
         "embedding_dimension": runtime.settings.embedding_dimension,
+        "version": runtime.knowledge_base.version,
         "ingest": runtime.knowledge_stats,
     }
+
+
+@router.get("/admin/status")
+async def admin_status() -> dict[str, Any]:
+    """Provider/key counts and load counters. Never contains keys or complaint text."""
+    return get_runtime().admin_status()
