@@ -1,0 +1,252 @@
+{
+  "version": 1,
+  "description_ar": "أسئلة ذهبية لوكيل المعرفة (RAG). كل سؤال له مستند أو أكثر يدعم الإجابة فعليًا من مجلد data/knowledge. الأسئلة غير القابلة للإجابة مذكورة منفصلة ويجب ألا يجيب عنها الوكيل من خارج قاعدة المعرفة.",
+  "questions": [
+    {
+      "id": "R01",
+      "language": "ar-msa",
+      "question": "كيف أقدم شكوى على الإنترنت؟",
+      "expected_documents": ["كيفية تقديم شكوى"]
+    },
+    {
+      "id": "R02",
+      "language": "ar-eg",
+      "question": "إزاي أقدم شكوى من الموبايل؟",
+      "expected_documents": ["كيفية تقديم شكوى"]
+    },
+    {
+      "id": "R03",
+      "language": "ar-msa",
+      "question": "ما هي المستندات المطلوبة لتقديم شكوى؟",
+      "expected_documents": ["المعلومات اللازمة لتقديم شكوى"]
+    },
+    {
+      "id": "R04",
+      "language": "ar-eg",
+      "question": "إيه المعلومات اللي لازم أقدمها مع الشكوى؟",
+      "expected_documents": ["المعلومات اللازمة لتقديم شكوى"]
+    },
+    {
+      "id": "R05",
+      "language": "ar-msa",
+      "question": "كم يستغرق الرد على الشكوى؟",
+      "expected_documents": ["الزمن المتوقع للاستجابة"]
+    },
+    {
+      "id": "R06",
+      "language": "ar-eg",
+      "question": "مدة معالجة الشكوى قد إيه؟",
+      "expected_documents": ["الزمن المتوقع للاستجابة"]
+    },
+    {
+      "id": "R07",
+      "language": "ar-eg",
+      "question": "الشارع فيه حفر ومحتاج ترميم",
+      "expected_documents": ["المسالك والطرق"]
+    },
+    {
+      "id": "R08",
+      "language": "ar-msa",
+      "question": "الرصيف مكسور أمام المدرسة",
+      "expected_documents": ["المسالك والطرق"]
+    },
+    {
+      "id": "R09",
+      "language": "ar-eg",
+      "question": "مين المسؤول عن إنارة الشارع؟",
+      "expected_documents": ["الإنارة العامة"]
+    },
+    {
+      "id": "R10",
+      "language": "ar-eg",
+      "question": "عمود النور مكسور ومفيش لمبة شغالة",
+      "expected_documents": ["الإنارة العامة"]
+    },
+    {
+      "id": "R11",
+      "language": "ar-msa",
+      "question": "تسريب مياه في الماسورة الرئيسية",
+      "expected_documents": ["المياه والصرف الصحي"]
+    },
+    {
+      "id": "R12",
+      "language": "ar-eg",
+      "question": "المجاري طفحت في الشارع",
+      "expected_documents": ["المياه والصرف الصحي"]
+    },
+    {
+      "id": "R13",
+      "language": "ar-eg",
+      "question": "الزبال متراكم في الشارع",
+      "expected_documents": ["النظافة والزبال"]
+    },
+    {
+      "id": "R14",
+      "language": "ar-msa",
+      "question": "القمامة لا يتم رفعها من الحي",
+      "expected_documents": ["النظافة والزبال"]
+    },
+    {
+      "id": "R15",
+      "language": "ar-msa",
+      "question": "أسلاك الكهرباء مكشوفة في الشارع",
+      "expected_documents": ["الكهرباء والأسلاك"]
+    },
+    {
+      "id": "R16",
+      "language": "ar-eg",
+      "question": "الكهربا مقطوعة من الصبح",
+      "expected_documents": ["الكهرباء والأسلاك"]
+    },
+    {
+      "id": "R17",
+      "language": "ar-msa",
+      "question": "ضوضاء عالية من ورشة قريبة",
+      "expected_documents": ["الضوضاء"]
+    },
+    {
+      "id": "R18",
+      "language": "ar-eg",
+      "question": "إزعاج وضجيج من مقهى بالليل",
+      "expected_documents": ["الضوضاء"]
+    },
+    {
+      "id": "R19",
+      "language": "ar-msa",
+      "question": "مخالفات بناء وترميم بدون ترخيص",
+      "expected_documents": ["الترميم والبناء"]
+    },
+    {
+      "id": "R20",
+      "language": "ar-eg",
+      "question": "في ترميم في العمارة من غير تصريح",
+      "expected_documents": ["الترميم والبناء"]
+    },
+    {
+      "id": "R21",
+      "language": "ar-msa",
+      "question": "ما هي مواعيد النقل العام؟",
+      "expected_documents": ["النقل العام"]
+    },
+    {
+      "id": "R22",
+      "language": "ar-eg",
+      "question": "الأتوبيس مش بيجي في الميعاد",
+      "expected_documents": ["النقل العام"]
+    },
+    {
+      "id": "R23",
+      "language": "ar-eg",
+      "question": "إزاي أتابع حالة الشكوى؟",
+      "expected_documents": ["كيفية متابعة الشكوى"]
+    },
+    {
+      "id": "R24",
+      "language": "ar-msa",
+      "question": "كيف أعرف حالة شكوتي؟",
+      "expected_documents": ["كيفية متابعة الشكوى"]
+    },
+    {
+      "id": "R25",
+      "language": "ar-msa",
+      "question": "هل يمكنني إرفاق صور مع الشكوى؟",
+      "expected_documents": ["كيفية إرفاق الصور"]
+    },
+    {
+      "id": "R26",
+      "language": "ar-eg",
+      "question": "إيه أنواع الصور المسموح أرفعها؟",
+      "expected_documents": ["كيفية إرفاق الصور"]
+    },
+    {
+      "id": "R27",
+      "language": "ar-msa",
+      "question": "هل بياناتي الشخصية محفوظة وسرية؟",
+      "expected_documents": ["خصوصية المعلومات"]
+    },
+    {
+      "id": "R28",
+      "language": "ar-eg",
+      "question": "مين يقدر يشوف بياناتي؟",
+      "expected_documents": ["خصوصية المعلومات"]
+    },
+    {
+      "id": "R29",
+      "language": "ar-eg",
+      "question": "حالة الشكوى مقبولة يعني إيه؟",
+      "expected_documents": ["حالات الشكوى ومعانيها"]
+    },
+    {
+      "id": "R30",
+      "language": "ar-msa",
+      "question": "ما معنى حالة مرفوضة للشكوى؟",
+      "expected_documents": ["حالات الشكوى ومعانيها"]
+    },
+    {
+      "id": "R31",
+      "language": "ar-eg",
+      "question": "كم يوم يحتاج الرد على الشكوى؟",
+      "expected_documents": ["الزمن المتوقع للاستجابة"]
+    },
+    {
+      "id": "R32",
+      "language": "ar-msa",
+      "question": "هل الصور مطلوبة عند تقديم الشكوى؟",
+      "expected_documents": ["كيفية إرفاق الصور", "المعلومات اللازمة لتقديم شكوى"]
+    },
+    {
+      "id": "R33",
+      "language": "ar-typo",
+      "question": "فيه حفره كبيره في الطريق",
+      "expected_documents": ["المسالك والطرق"]
+    },
+    {
+      "id": "R34",
+      "language": "ar-typo",
+      "question": "الكهربا بتقطع كتير",
+      "expected_documents": ["الكهرباء والأسلاك"]
+    },
+    {
+      "id": "R35",
+      "language": "ar-eg",
+      "question": "الشكوى بتاخد وقت قد إيه لحد ما تتحل؟",
+      "expected_documents": ["الزمن المتوقع للاستجابة"]
+    },
+    {
+      "id": "R36",
+      "language": "ar-msa",
+      "question": "كيف أرفع صورة أو مرفق مع الشكوى؟",
+      "expected_documents": ["كيفية إرفاق الصور"]
+    }
+  ],
+  "unanswerable": [
+    {
+      "id": "U01",
+      "question": "كم رسوم استخراج رخصة القيادة؟",
+      "reason_ar": "الرسوم ليست في قاعدة المعرفة."
+    },
+    {
+      "id": "U02",
+      "question": "ما هو رقم هاتف مكتب البريد في أسوان؟",
+      "reason_ar": "أرقام الهواتف غير موجودة، ويُمنع اختراعها.",
+      "requires_llm": true
+    },
+    {
+      "id": "U03",
+      "question": "ما هي عقوبة البناء بدون ترخيص؟",
+      "reason_ar": "العقوبات القانونية غير موجودة في قاعدة المعرفة.",
+      "requires_llm": true
+    },
+    {
+      "id": "U04",
+      "question": "كيف أحجز موعدًا في السجل المدني؟",
+      "reason_ar": "خدمة السجل المدني غير مشمولة في المستندات."
+    },
+    {
+      "id": "U05",
+      "question": "ما هي مواعيد عمل البنوك في العيد؟",
+      "reason_ar": "خارج نطاق قاعدة المعرفة تمامًا.",
+      "requires_llm": true
+    }
+  ]
+}

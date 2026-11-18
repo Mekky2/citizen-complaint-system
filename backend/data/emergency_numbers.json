@@ -1,0 +1,55 @@
+{
+  "source": "Ministry of Interior, Ministry of Health, Civil Protection, Egyptian Ministry of Electricity, Ministry of Utilities, Government Unified Complaints",
+  "last_verified": "2026-01-01",
+  "numbers": [
+    {
+      "id": "police",
+      "category": "emergency",
+      "name": "Police Emergency",
+      "number": "122",
+      "description": "Police emergency - report crimes, emergencies, security incidents"
+    },
+    {
+      "id": "ambulance",
+      "category": "emergency",
+      "name": "Ambulance",
+      "number": "123",
+      "description": "Medical emergency - ambulance and emergency medical services"
+    },
+    {
+      "id": "fire",
+      "category": "emergency",
+      "name": "Fire Department",
+      "number": "180",
+      "description": "Fire emergency - fire brigade and firefighting"
+    },
+    {
+      "id": "gas",
+      "category": "emergency",
+      "name": "Natural Gas Emergency",
+      "number": "129",
+      "description": "Gas leak emergency - natural gas incidents"
+    },
+    {
+      "id": "electricity",
+      "category": "emergency",
+      "name": "Electricity Emergency",
+      "number": "121",
+      "description": "Electrical fault emergency - power outage, electrical hazards"
+    },
+    {
+      "id": "water",
+      "category": "emergency",
+      "name": "Water Emergency",
+      "number": "125",
+      "description": "Water emergency - water main break, contaminated water"
+    },
+    {
+      "id": "complaints",
+      "category": "non-emergency",
+      "name": "Government Unified Complaints Line",
+      "number": "16528",
+      "description": "Unified government complaints line - non-emergency issues"
+    }
+  ]
+}
