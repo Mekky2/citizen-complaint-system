@@ -20,6 +20,18 @@ logger = logging.getLogger(__name__)
 _PLACEHOLDER_KEYS = {"", "changeme", "your-nvidia-nim-api-key"}
 
 
+def _retry_after(exc: "openai.APIStatusError") -> float | None:
+    """Read Retry-After (seconds) from a provider error, tolerating every malformed shape."""
+    try:
+        raw = exc.response.headers.get("retry-after")
+        if raw is None:
+            return None
+        seconds = float(raw)
+        return seconds if 0 <= seconds <= 3600 else None
+    except (AttributeError, TypeError, ValueError):
+        return None
+
+
 class LLMConfigError(Exception):
     """Missing/placeholder API key or unsupported provider. Raised when building the client."""
 
@@ -28,10 +40,20 @@ class LLMProviderError(Exception):
     """A provider call failed. `transient` tells the caller whether a retry makes sense
     (timeouts, connection problems, 429, 5xx) or not (bad key, bad request)."""
 
-    def __init__(self, message: str, *, transient: bool, status_code: int | None = None):
+    def __init__(
+        self,
+        message: str,
+        *,
+        transient: bool,
+        status_code: int | None = None,
+        retry_after_seconds: float | None = None,
+    ):
         super().__init__(message)
         self.transient = transient
         self.status_code = status_code
+        # Populated from the provider's Retry-After header when present, so the gateway can
+        # honour it instead of guessing a cooldown.
+        self.retry_after_seconds = retry_after_seconds
 
 
 class NvidiaNimClient:
@@ -74,7 +96,12 @@ class NvidiaNimClient:
             raise self._wrap(exc, transient=True) from None
         except openai.APIStatusError as exc:
             status = exc.status_code
-            raise self._wrap(exc, transient=status == 429 or status >= 500, status=status) from None
+            raise self._wrap(
+                exc,
+                transient=status == 429 or status >= 500,
+                status=status,
+                retry_after=_retry_after(exc),
+            ) from None
         except Exception as exc:  # SDK bug, bad response shape, anything unexpected
             raise self._wrap(exc, transient=False) from None
 
@@ -85,7 +112,13 @@ class NvidiaNimClient:
         return content if isinstance(content, str) else ""
 
     @staticmethod
-    def _wrap(exc: Exception, *, transient: bool, status: int | None = None) -> LLMProviderError:
+    def _wrap(
+        exc: Exception,
+        *,
+        transient: bool,
+        status: int | None = None,
+        retry_after: float | None = None,
+    ) -> LLMProviderError:
         # Only the exception class and status code: no message text (could echo request data).
         logger.warning(
             "llm call failed: %s status=%s transient=%s", type(exc).__name__, status, transient
@@ -94,6 +127,7 @@ class NvidiaNimClient:
             f"NVIDIA NIM call failed ({type(exc).__name__})",
             transient=transient,
             status_code=status,
+            retry_after_seconds=retry_after,
         )
 
 
