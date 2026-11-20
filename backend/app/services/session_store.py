@@ -101,9 +101,7 @@ class InMemorySessionStore:
         if self.ttl_seconds <= 0:
             return
         expired = [
-            key
-            for key, entry in self._entries.items()
-            if now - entry.last_seen > self.ttl_seconds
+            key for key, entry in self._entries.items() if now - entry.last_seen > self.ttl_seconds
         ]
         for key in expired:
             self._entries.pop(key, None)

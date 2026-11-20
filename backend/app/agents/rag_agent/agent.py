@@ -150,15 +150,11 @@ def _marker_pattern(marker: str) -> str:
 def _has_marker(normalized: str, raw_lower: str, marker: str) -> bool:
     """Match Arabic markers on word boundaries and English markers as whole words."""
     if marker.isascii():
-        return re.search(
-            r"(?<!\w)" + re.escape(marker.lower()) + r"(?!\w)", raw_lower
-        ) is not None
+        return re.search(r"(?<!\w)" + re.escape(marker.lower()) + r"(?!\w)", raw_lower) is not None
     return re.search(_marker_pattern(marker), normalized) is not None
 
 
-def _has_any_marker(
-    normalized: str, raw_lower: str, markers: tuple[str, ...]
-) -> bool:
+def _has_any_marker(normalized: str, raw_lower: str, markers: tuple[str, ...]) -> bool:
     return any(_has_marker(normalized, raw_lower, marker) for marker in markers)
 
 
@@ -275,9 +271,7 @@ class RAGAgent:
             if not isinstance(embedding, list) or not embedding:
                 raise ValueError("embedding provider returned no vector")
 
-            results: list[RetrievalResult] = list(
-                self._search(embedding, normalized_query)
-            )
+            results: list[RetrievalResult] = list(self._search(embedding, normalized_query))
             results = [r for r in results if r.similarity >= self.threshold][: self.top_k]
 
             if not results:
@@ -286,9 +280,7 @@ class RAGAgent:
             if not self._has_lexical_overlap(normalized_query, results):
                 return self._not_found("NO_LEXICAL_SUPPORT")
 
-            context = "\n\n".join(
-                f"[{i}] {r.title}\n{r.excerpt}" for i, r in enumerate(results, 1)
-            )
+            context = "\n\n".join(f"[{i}] {r.title}\n{r.excerpt}" for i, r in enumerate(results, 1))
             history = self._history_block()
             system_prompt = GENERATE_SYSTEM.replace("<context>", context)
             user_prompt = (
@@ -449,9 +441,7 @@ class RAGAgent:
             review_notes=[note],
         )
 
-    def _has_lexical_overlap(
-        self, query: str, results: list[RetrievalResult]
-    ) -> bool:
+    def _has_lexical_overlap(self, query: str, results: list[RetrievalResult]) -> bool:
         """Guard against answering from embedding noise with no shared content words.
 
         Only enforced for providers that declare ``requires_lexical_overlap`` (the offline
@@ -568,9 +558,7 @@ def run_rag_agent(
             "ticket_id": state.get("ticket_id", ""),
             "status": "completed",
             "handoff_to": None,
-            "answer": (
-                "حدث خطأ في الخدمة. يُرجى المحاولة مرة أخرى أو التواصل مع الجهة المختصة."
-            ),
+            "answer": ("حدث خطأ في الخدمة. يُرجى المحاولة مرة أخرى أو التواصل مع الجهة المختصة."),
             "sources": [],
             "confidence": "low",
             "found_in_kb": False,

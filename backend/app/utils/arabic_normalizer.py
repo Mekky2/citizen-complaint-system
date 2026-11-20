@@ -49,11 +49,11 @@ _NOISE: Final = re.compile(r"[^\w\s\u060C\u061B\u061F\u066A\u066B\u066C\u066D]")
 # Basic emoji ranges (emoji are never useful for municipal text matching).
 _EMOJI: Final = re.compile(
     "["
-    "\U0001F300-\U0001FAFF"
-    "\U00002600-\U000027BF"
-    "\U0001F000-\U0001F0FF"
-    "\U00002190-\U000021FF"
-    "\U0000FE00-\U0000FE0F"
+    "\U0001f300-\U0001faff"
+    "\U00002600-\U000027bf"
+    "\U0001f000-\U0001f0ff"
+    "\U00002190-\U000021ff"
+    "\U0000fe00-\U0000fe0f"
     "]"
 )
 

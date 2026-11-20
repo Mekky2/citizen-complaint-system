@@ -66,7 +66,7 @@ class HashingEmbeddingProvider:
         for word in words:
             padded = f" {word} "
             for i in range(len(padded) - 2):
-                features.append(f"c:{padded[i:i + 3]}")
+                features.append(f"c:{padded[i : i + 3]}")
         return features
 
     def embed(self, text: str) -> list[float]:

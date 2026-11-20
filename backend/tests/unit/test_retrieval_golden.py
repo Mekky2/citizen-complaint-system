@@ -31,12 +31,8 @@ def kb() -> InMemoryKnowledgeBase:
 
 
 def _retrieve(kb: InMemoryKnowledgeBase, question: str, k: int = 5):
-    embedding = kb.embedding_provider.embed(
-        normalize_arabic(question, fold_taa_marbuta=True)
-    )
-    return kb.search(
-        embedding, top_k=k, threshold=0.05, query_text=normalize_arabic(question)
-    )
+    embedding = kb.embedding_provider.embed(normalize_arabic(question, fold_taa_marbuta=True))
+    return kb.search(embedding, top_k=k, threshold=0.05, query_text=normalize_arabic(question))
 
 
 def test_golden_dataset_has_enough_cases(data):

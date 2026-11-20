@@ -87,8 +87,12 @@ def test_retries_after_429_and_honours_retry_after():
         waits.append(seconds)
         time.sleep(seconds)
 
-    client = ScriptedClient([LLMProviderError("rate", transient=True, status_code=429,
-                                              retry_after_seconds=0.01), "نجاح"])
+    client = ScriptedClient(
+        [
+            LLMProviderError("rate", transient=True, status_code=429, retry_after_seconds=0.01),
+            "نجاح",
+        ]
+    )
     gateway = _gateway(
         [_provider("primary", {"k1": client}, ("k1",))],
         max_attempts=2,
@@ -133,8 +137,9 @@ def test_primary_down_falls_through_to_secondary_provider():
 def test_all_providers_down_answers_offline_and_marks_degraded():
     offline = OfflineStub()
     broken = ScriptedClient([LLMProviderError("boom", transient=True, status_code=500)])
-    gateway = _gateway([_provider("primary", {"k": broken}, ("k",))], offline=offline,
-                       max_attempts=1)
+    gateway = _gateway(
+        [_provider("primary", {"k": broken}, ("k",))], offline=offline, max_attempts=1
+    )
     trace = start_trace()
 
     assert gateway.complete("sys", "user") == offline.answer
@@ -221,9 +226,7 @@ def test_build_gateway_without_keys_is_offline_only():
 
 
 def test_pools_are_isolated_and_round_robin():
-    pool = KeyPool.build(
-        ("a", "b"), threshold=1, open_seconds=10, auth_seconds=10
-    )
+    pool = KeyPool.build(("a", "b"), threshold=1, open_seconds=10, auth_seconds=10)
     assert pool.acquire()[1] == "a"
     assert pool.acquire()[1] == "b"
     assert pool.acquire()[1] == "a"

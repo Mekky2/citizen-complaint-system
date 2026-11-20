@@ -42,9 +42,7 @@ class KnowledgeBaseRetriever:
         )
         ordered = list(results)
         if category:
-            ordered.sort(
-                key=lambda item: self._category(item.document_id) != category
-            )
+            ordered.sort(key=lambda item: self._category(item.document_id) != category)
         return [
             {"source": item.title, "excerpt": item.excerpt}
             for item in ordered

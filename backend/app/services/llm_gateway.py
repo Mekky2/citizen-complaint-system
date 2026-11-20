@@ -189,9 +189,7 @@ class KeyPool:
         with self._lock:
             self._health[index].success()
 
-    def failure(
-        self, index: int, *, status: int | None, retry_after: float | None
-    ) -> None:
+    def failure(self, index: int, *, status: int | None, retry_after: float | None) -> None:
         with self._lock:
             self._health[index].failure(
                 status=status, retry_after=retry_after, now=time.monotonic()
@@ -357,8 +355,11 @@ class LLMGateway:
             "failures": failures,
             "offline_calls": offline,
             "providers": [
-                {"name": provider.config.name, "model": provider.config.model,
-                 **provider.pool.snapshot()}
+                {
+                    "name": provider.config.name,
+                    "model": provider.config.model,
+                    **provider.pool.snapshot(),
+                }
                 for provider in self.providers
             ],
             "budget": self.budget.snapshot() if self.budget else None,
@@ -468,11 +469,7 @@ class LLMGateway:
         *,
         degraded: bool,
     ) -> None:
-        tokens = (
-            estimate_tokens(system)
-            + estimate_tokens(user)
-            + estimate_tokens(answer)
-        )
+        tokens = estimate_tokens(system) + estimate_tokens(user) + estimate_tokens(answer)
         if not degraded:
             if self.budget is not None:
                 self.budget.record(user_id, tokens)

@@ -196,8 +196,12 @@ class Runtime:
         cached = self.answer_cache.get(message)
         if cached is not None:
             trace.cache_hit = True
-            return {**cached, "session_id": session_id, "degraded": trace.degraded,
-                    "request_id": trace.request_id}
+            return {
+                **cached,
+                "session_id": session_id,
+                "degraded": trace.degraded,
+                "request_id": trace.request_id,
+            }
 
         rag_result = rag.run(
             {

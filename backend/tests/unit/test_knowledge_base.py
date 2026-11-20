@@ -56,7 +56,7 @@ def test_estimate_tokens_is_conservative():
 def test_markdown_front_matter_and_stable_hash(tmp_path):
     path = tmp_path / "doc.md"
     path.write_text(
-        "---\ntitle: \"الإنارة\"\nauthority: \"مديرية الكهرباء\"\n---\n\n# الإنارة\n\nنص.",
+        '---\ntitle: "الإنارة"\nauthority: "مديرية الكهرباء"\n---\n\n# الإنارة\n\nنص.',
         encoding="utf-8",
     )
     first = load_document(path, root=tmp_path)
@@ -140,7 +140,7 @@ def test_build_embedding_provider_rejects_bad_configuration():
 # --------------------------------------------------------------------- ingestion
 def _write_doc(root: Path, name: str, title: str, body: str) -> None:
     (root / name).write_text(
-        f"---\ntitle: \"{title}\"\nlanguage: \"ar\"\n---\n\n# {title}\n\n{body}",
+        f'---\ntitle: "{title}"\nlanguage: "ar"\n---\n\n# {title}\n\n{body}',
         encoding="utf-8",
     )
 
@@ -172,12 +172,8 @@ def test_real_knowledge_ingestion_and_hybrid_search():
     assert kb.chunk_count > 100
 
     query = "الزبال متراكم في الشارع"
-    embedding = kb.embedding_provider.embed(
-        normalize_arabic(query, fold_taa_marbuta=True)
-    )
-    results = kb.search(
-        embedding, top_k=3, threshold=0.05, query_text=normalize_arabic(query)
-    )
+    embedding = kb.embedding_provider.embed(normalize_arabic(query, fold_taa_marbuta=True))
+    results = kb.search(embedding, top_k=3, threshold=0.05, query_text=normalize_arabic(query))
 
     assert results[0].title == "النظافة والزبال"
     titles = [r.title for r in results]

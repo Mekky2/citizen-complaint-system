@@ -196,9 +196,7 @@ class InMemoryKnowledgeBase:
                 for chunk in self.chunks
             ]
             self._title_tokens = [
-                tokenize_for_search(
-                    f"{chunk.get('title') or ''} {chunk.get('section') or ''}"
-                )
+                tokenize_for_search(f"{chunk.get('title') or ''} {chunk.get('section') or ''}")
                 for chunk in self.chunks
             ]
             self._bm25 = BM25Index(self._bm25_tokens)

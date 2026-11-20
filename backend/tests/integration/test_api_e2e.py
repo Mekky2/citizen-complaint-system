@@ -23,9 +23,7 @@ def client():
 
 
 def _chat(client: TestClient, message: str, session_id: str = "e2e") -> dict:
-    response = client.post(
-        "/api/v1/chat", json={"message": message, "session_id": session_id}
-    )
+    response = client.post("/api/v1/chat", json={"message": message, "session_id": session_id})
     assert response.status_code == 200, response.text
     return response.json()
 
@@ -98,14 +96,10 @@ def _new_ticket(client: TestClient, session_id: str, text: str) -> str:
 
 
 def test_ticket_lifecycle_follows_documented_transitions(client):
-    ticket_id = _new_ticket(
-        client, "e2e-lifecycle", "ماسورة مياه مكسورة في شارع الجمهورية"
-    )
+    ticket_id = _new_ticket(client, "e2e-lifecycle", "ماسورة مياه مكسورة في شارع الجمهورية")
 
     for status in ["Approved", "In Progress", "Verifying", "Done"]:
-        response = client.post(
-            f"/api/v1/tickets/{ticket_id}/review", json={"status": status}
-        )
+        response = client.post(f"/api/v1/tickets/{ticket_id}/review", json={"status": status})
         assert response.status_code == 200, response.text
         assert response.json()["status"] == status
 
@@ -114,13 +108,9 @@ def test_ticket_lifecycle_follows_documented_transitions(client):
 
 
 def test_invalid_transition_is_rejected_without_changing_status(client):
-    ticket_id = _new_ticket(
-        client, "e2e-transition", "إنارة الشارع مقطوعة في شارع النيل"
-    )
+    ticket_id = _new_ticket(client, "e2e-transition", "إنارة الشارع مقطوعة في شارع النيل")
 
-    response = client.post(
-        f"/api/v1/tickets/{ticket_id}/review", json={"status": "Done"}
-    )
+    response = client.post(f"/api/v1/tickets/{ticket_id}/review", json={"status": "Done"})
 
     assert response.status_code == 409
     assert "انتقال حالة غير مسموح" in response.json()["detail"]
@@ -128,23 +118,19 @@ def test_invalid_transition_is_rejected_without_changing_status(client):
 
 
 def test_dismissed_and_declined_statuses_are_supported(client):
-    dismissed = _new_ticket(
-        client, "e2e-dismiss", "شكوى مكررة عن القمامة في شارع النيل"
-    )
+    dismissed = _new_ticket(client, "e2e-dismiss", "شكوى مكررة عن القمامة في شارع النيل")
     assert (
-        client.post(
-            f"/api/v1/tickets/{dismissed}/review", json={"status": "Dismissed"}
-        ).json()["status"]
+        client.post(f"/api/v1/tickets/{dismissed}/review", json={"status": "Dismissed"}).json()[
+            "status"
+        ]
         == "Dismissed"
     )
 
-    declined = _new_ticket(
-        client, "e2e-decline", "حفرة في شارع النيل"
-    )
+    declined = _new_ticket(client, "e2e-decline", "حفرة في شارع النيل")
     assert (
-        client.post(
-            f"/api/v1/tickets/{declined}/review", json={"status": "Declined"}
-        ).json()["status"]
+        client.post(f"/api/v1/tickets/{declined}/review", json={"status": "Declined"}).json()[
+            "status"
+        ]
         == "Declined"
     )
 
@@ -152,17 +138,13 @@ def test_dismissed_and_declined_statuses_are_supported(client):
 def test_review_unknown_ticket_returns_404(client):
     assert client.get("/api/v1/tickets/TKT-0000-0000").status_code == 404
     assert (
-        client.post(
-            "/api/v1/tickets/TKT-0000-0000/review", json={"status": "Approved"}
-        ).status_code
+        client.post("/api/v1/tickets/TKT-0000-0000/review", json={"status": "Approved"}).status_code
         == 404
     )
 
 
 def test_validation_errors_do_not_echo_the_message(client):
-    response = client.post(
-        "/api/v1/chat", json={"message": "x" * 5000, "session_id": "too-long"}
-    )
+    response = client.post("/api/v1/chat", json={"message": "x" * 5000, "session_id": "too-long"})
     assert response.status_code == 422
     assert "x" * 100 not in response.text
     assert response.json()["detail"][0]["type"] == "string_too_long"

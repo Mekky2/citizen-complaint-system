@@ -27,7 +27,7 @@ def test_conversation_extraction_keeps_rule_based_urgency():
 def test_category_and_severity_tools_answer_their_own_json_shape():
     llm = _llm()
     category = json.loads(
-        llm.complete("Pick exactly one category.", '<complaint>حفرة كبيرة في الطريق</complaint>')
+        llm.complete("Pick exactly one category.", "<complaint>حفرة كبيرة في الطريق</complaint>")
     )
     assert category == {"category": "Roads"}
 

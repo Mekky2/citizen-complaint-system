@@ -60,9 +60,7 @@ def test_offline_rules_produce_a_grounded_analysis():
     from app.services.offline_llm import GroundedTemplateLLM, OfflineToolLLM
 
     reset_trace()
-    gateway = LLMGateway(
-        [], offline=OfflineToolLLM(GroundedTemplateLLM()), max_attempts=1
-    )
+    gateway = LLMGateway([], offline=OfflineToolLLM(GroundedTemplateLLM()), max_attempts=1)
     result = send_to_complaint_agent(_state(), llm=gateway, rag=_retriever())
 
     assert result["status"] == "ComplaintAnalyzed"

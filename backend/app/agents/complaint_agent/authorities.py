@@ -282,9 +282,7 @@ _DATE = re.compile(
     r"يوم|اسبوع|أسبوع|شهر|سنه|سنة)"
     r"|(?:امبارح|أمس|اليوم|النهارده|النهاردة|الصبح)"
 )
-_STREET_STOP = re.compile(
-    r"\s+(?:في|فى|بال|بـ|من|عند|جنب|أمام|امام|بجوار|خلف|قريب|اللي|اللى)\s+"
-)
+_STREET_STOP = re.compile(r"\s+(?:في|فى|بال|بـ|من|عند|جنب|أمام|امام|بجوار|خلف|قريب|اللي|اللى)\s+")
 
 
 def _normalized_keywords(keywords: tuple[str, ...]) -> set[str]:
@@ -351,12 +349,9 @@ def urgency_for_text(text: str) -> tuple[str, str]:
         return "high", "المشكلة تسبب تعطلًا كبيرًا أو تتفاقم بمرور الوقت."
     # A broken/leaking water pipe is a service interruption even when the wording puts the
     # leak before the pipe ("تسريب مياه") or the pipe before the leak ("ماسورة مكسورة").
-    water = any(
-        _is_word_start_match(normalized, word) for word in ("ماسور", "مياه", "ميه")
-    )
+    water = any(_is_word_start_match(normalized, word) for word in ("ماسور", "مياه", "ميه"))
     leak = any(
-        _is_word_start_match(normalized, word)
-        for word in ("مكسور", "تسرب", "بتسرب", "تسريب")
+        _is_word_start_match(normalized, word) for word in ("مكسور", "تسرب", "بتسرب", "تسريب")
     )
     if water and leak:
         return "high", "تسريب أو كسر في شبكة المياه قد يتفاقم ويؤثر على إمداد المياه."

@@ -118,9 +118,7 @@ def test_vague_message_asks_follow_up_then_accepts_details(store):
     assert "ما نوع المشكلة" in first["reply_ar"]
     assert store.list() == []
 
-    second = handle_message(
-        session, "المشكلة زبالة متراكمة في شارع النيل", store=store
-    )
+    second = handle_message(session, "المشكلة زبالة متراكمة في شارع النيل", store=store)
     assert second["stage"] == "awaiting_confirmation"
     assert second["draft"]["category"] == "Environment"
     assert second["missing_fields"] == []
@@ -157,9 +155,7 @@ def test_duplicate_ticket_is_detected_and_linked(store):
     assert linked["stage"] == "linked"
     assert linked["ticket"]["ticket_id"] == ticket_id
     assert len(store.list()) == 1
-    assert any(
-        note.startswith("LINKED_DUPLICATE") for note in store.get(ticket_id).review_notes
-    )
+    assert any(note.startswith("LINKED_DUPLICATE") for note in store.get(ticket_id).review_notes)
 
 
 def test_emergency_uses_only_official_numbers_and_creates_no_ticket(store):

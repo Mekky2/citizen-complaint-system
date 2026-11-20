@@ -40,9 +40,7 @@ TICKET_STATUSES = (
 )
 
 # Tickets that can still be duplicate-reported. Terminal tickets are excluded.
-OPEN_STATUSES = frozenset(
-    {STATUS_PENDING, STATUS_APPROVED, STATUS_IN_PROGRESS, STATUS_VERIFYING}
-)
+OPEN_STATUSES = frozenset({STATUS_PENDING, STATUS_APPROVED, STATUS_IN_PROGRESS, STATUS_VERIFYING})
 
 # Tokens that describe the act of complaining rather than the problem itself. They are
 # ignored when comparing descriptions so a filler prefix such as "في مشكلة ..." does not

@@ -45,9 +45,7 @@ def create_app() -> FastAPI:
     @app.exception_handler(Exception)
     async def unhandled_error_handler(request: Request, exc: Exception) -> JSONResponse:
         """Last resort: Arabic 503 instead of a 500 or a stack trace."""
-        logger.error(
-            "unhandled error path=%s type=%s", request.url.path, type(exc).__name__
-        )
+        logger.error("unhandled error path=%s type=%s", request.url.path, type(exc).__name__)
         return JSONResponse(status_code=503, content={"detail": UNEXPECTED_ERROR})
 
     app.include_router(agents_router)

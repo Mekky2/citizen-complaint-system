@@ -53,9 +53,7 @@ class SlidingWindowLimiter:
 
     def _prune(self, now: float) -> None:
         stale = [
-            key
-            for key, hits in self._hits.items()
-            if not hits or now - hits[-1] >= self._window
+            key for key, hits in self._hits.items() if not hits or now - hits[-1] >= self._window
         ]
         for key in stale:
             self._hits.pop(key, None)
